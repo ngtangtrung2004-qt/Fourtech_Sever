@@ -1,0 +1,1 @@
+- Thư mục migrations để tạo các bảng trong database
