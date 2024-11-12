@@ -9,6 +9,8 @@ import categoryRouter from './src/routers/categoryRouter'
 import productRouter from './src/routers/productRouter'
 import brandRouter from './src/routers/brand'
 import cookieParser from 'cookie-parser';
+// const contactRouter = require('./routes/contactRouter');
+import contactRouter from './src/routers/contactRouter'
 
 const app = express();
 
@@ -38,6 +40,9 @@ app.use('/api/', authRouter);
 app.use('/api/', categoryRouter);
 app.use('/api/', productRouter);
 app.use('/api/', brandRouter);
+
+//
+app.use('/api', contactRouter);
 
 app.use((req, res) => {
   return res.send('404 Not Found')
