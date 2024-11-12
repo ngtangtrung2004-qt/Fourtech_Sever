@@ -3,7 +3,6 @@ const { sendEmailService } = require('../services/emailService.js');
 require('dotenv').config();
 
 exports.sendReply = async (req, res) => {
-    //   console.log("sendReply function accessed");
     const { email, message } = req.body;
 
     // console.log('Email:', email);

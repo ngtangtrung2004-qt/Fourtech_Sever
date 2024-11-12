@@ -11,12 +11,7 @@ import brandRouter from './src/routers/brand'
 import imageRouter from './src/routers/imageRouter'
 
 import cookieParser from 'cookie-parser';
-<<<<<<< HEAD
-// const contactRouter = require('./routes/contactRouter');
-import contactRouter from './src/routers/contactRouter'
-=======
 import path from 'path'
->>>>>>> 2394cd0eb77a308a940917a77c2cec3814ee4e4d
 
 const app = express();
 
