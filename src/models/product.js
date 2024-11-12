@@ -18,10 +18,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'product_id',
                 as: 'cart_itemData'
             })
-            product.hasMany(models.product_image, {
-                foreignKey: 'product_id',
-                as: 'product_imageData'
-            })
             product.belongsTo(models.brand, {
                 foreignKey: 'brand_id',
                 as: 'brandData'
@@ -38,19 +34,30 @@ module.exports = (sequelize, DataTypes) => {
     }
     product.init({
         name: DataTypes.STRING,
-        base_price: DataTypes.INTEGER,
-        promotion_price: DataTypes.INTEGER,
         category_id: DataTypes.INTEGER,
         brand_id: DataTypes.INTEGER,
+        image: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            get() {
+                const rawValue = this.getDataValue('image');
+                return rawValue ? JSON.parse(rawValue) : [];
+            },
+            set(value) {
+                this.setDataValue('image', JSON.stringify(value));
+            },
+        },
+        base_price: DataTypes.INTEGER,
+        promotion_price: DataTypes.INTEGER,
         description: DataTypes.TEXT,
         quantity: DataTypes.INTEGER,
-        status: DataTypes.INTEGER,
         view: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'product',
         tableName: 'product',
-        timestamps: false,
+        timestamps: true,
+        underscored: true
     });
     return product;
 };

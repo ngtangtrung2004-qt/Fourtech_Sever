@@ -3,7 +3,7 @@ import db from '../models'
 import bcrypt, { genSaltSync } from 'bcrypt'
 import { createJWT } from '../middleware/jwtAction';
 
-const registerServies = async (dataRegister) => {
+const registerService = async (dataRegister) => {
     try {
         const checkEmail = async (email) => {
             let emailUser = await db.user.findOne({
@@ -31,12 +31,14 @@ const registerServies = async (dataRegister) => {
         if (isEmailExist == true) {
             return {
                 message: "Email đăng ký đã tồn tại!!",
-                EC: 1
+                EC: 1,
+                data: ''
             }
         } else if (isPhoneExist == true) {
             return {
                 message: "Số điện thoại đăng ký đã tồn tại!",
-                EC: 1
+                EC: 1,
+                data: ''
             }
         } else {
             const dataUser = await db.user.create({
@@ -48,7 +50,8 @@ const registerServies = async (dataRegister) => {
 
             return {
                 message: "Đăng ký thành công.",
-                EC: 0
+                EC: 0,
+                data: ''
             }
         }
     } catch (error) {
@@ -60,7 +63,7 @@ const registerServies = async (dataRegister) => {
     }
 }
 
-export const loginService = async (dataLogin) => {
+const loginService = async (dataLogin) => {
     try {
         const checkPassword = (inputPassword, hashPassword) => {
             return bcrypt.compareSync(inputPassword, hashPassword); //kiểm tra xem mật khẩu người dùng nhập vào có khớp với mật khẩu đã được mã hóa ko
@@ -96,16 +99,15 @@ export const loginService = async (dataLogin) => {
                 return {
                     message: "Email/Sđt hoặc mật khẩu không đúng!",
                     EC: 1,
-                    data: {
-                        access_token: ''
-                    }
+                    data: ''
                 }
             }
 
         } else {
             return {
                 message: "Tài khoản chưa được đăng ký!",
-                EC: 1
+                EC: 1,
+                data: ''
             }
         }
 
@@ -113,12 +115,70 @@ export const loginService = async (dataLogin) => {
         console.log(error);
         return {
             message: "Có lỗi trong service!",
-            EC: -1
+            EC: -1,
+            data: ''
+        }
+    }
+}
+
+const getAllUser = async () => {
+    try {
+        const data = await db.user.findAll({
+            attributes: ['id', 'full_name', 'email', 'phone', 'role', 'created_at'],
+            order: [
+                ['created_at', 'DESC']  // Sắp xếp theo trường 'created_at' giảm dần (DESC)
+            ]
+        })
+
+        return {
+            message: "Lấy tất cả người dùng thành công.",
+            EC: 0,
+            data: data
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            message: "Có lỗi trong service!",
+            EC: -1,
+            data: ''
+        }
+    }
+}
+
+const deleteService = async (id) => {
+    try {
+        const user = await db.user.findOne({
+            where: {
+                id: id
+            }
+        })
+        if (user) {
+            await user.destroy()
+            return ({
+                message: "Xóa tài khoản thành công.",
+                EC: 0,
+                data: ''
+            })
+        } else {
+            return ({
+                message: "Xóa tài khoản thất bại!",
+                EC: 1,
+                data: ''
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            message: "Có lỗi trong service!",
+            EC: -1,
+            data: ''
         }
     }
 }
 
 module.exports = {
-    registerServies,
-    loginService
+    registerService,
+    loginService,
+    getAllUser,
+    deleteService
 }

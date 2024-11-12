@@ -45,11 +45,6 @@ module.exports = {
                 allowNull: false,
                 defaultValue: 0
             },
-            status: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                defaultValue: 0
-            },
             view: {
                 type: Sequelize.INTEGER,
                 allowNull: false,

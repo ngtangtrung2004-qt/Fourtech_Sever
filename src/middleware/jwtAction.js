@@ -14,24 +14,54 @@ export const createJWT = (payload) => {
     return token
 }
 
-export const veryfiToken = (token) => {
+export const verifyToken = (token) => {
     const secretKey = process.env.JWT_SECRET;
-    let data = null;
+    let decoded = null;
     try {
-        let decoded = jwt.verify(token, secretKey);
-        data = decoded
+        decoded = jwt.verify(token, secretKey);
     } catch (error) {
-        console.log(err);
+        console.log(error);
     }
-    return data
+    return decoded
 }
 
-export const checkUserJWT = (req, res, next) => {
-    let cookies = req.cookies;
+// export const checkUserJWT = (req, res, next) => {
+//     let cookies = req.cookies;
 
-    if (cookies && cookies.jwt) {
-        console.log(cookies.jwt);
-    }
-    // console.log(cookies);
+//     if (cookies && cookies.jwt) {
+//         let token = cookies.jwt
+//         let decoded = verifyToken(token)
 
-}
+//         if (decoded) {
+//             req.user = decoded
+//             next()
+//         } else {
+//             return res.status(401).json({
+//                 EC: -1,
+//                 data: '',
+//                 message: "Người dùng chưa được xác thực"
+//             })
+//         }
+
+//         console.log('my cookie>>>>', token);
+//     } else {
+//         return res.status(401).json({
+//             EC: -1,
+//             data: '',
+//             message: "Người dùng chưa được xác thực"
+//         })
+//     }
+// }
+
+// export const checkUserPermission = (req, res, next) => {
+//     if(req.user) {
+//         let email = req.user.email
+//         let role = req.user.role
+//     } else {
+//         return res.status(401).json({
+//             EC: -1,
+//             data: '',
+//             message: "Người dùng chưa được xác thực"
+//         })
+//     }
+// }
