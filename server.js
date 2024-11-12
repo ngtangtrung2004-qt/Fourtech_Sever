@@ -7,6 +7,7 @@ import cors from 'cors'
 import authRouter from './src/routers/authRouter'
 import categoryRouter from './src/routers/categoryRouter'
 import productRouter from './src/routers/productRouter'
+import contactRouter from './src/routers/contactRouter'
 import brandRouter from './src/routers/brand'
 import imageRouter from './src/routers/imageRouter'
 
