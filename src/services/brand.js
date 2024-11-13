@@ -7,93 +7,154 @@ import { deleteImage } from "../config/configMulter";
 const getAllBrand = async () => {
     try {
         let data = await db.brand.findAll({
-            attributes: ['id', 'name', 'logo', 'created_at', 'updated_at'],
+            attributes: ['id', 'name', 'logo', 'category_id', 'created_at', 'updated_at'],
             order: [
                 ['created_at', 'DESC']
-            ]
+            ],
+            include: {
+                model: db.category,
+                as: 'category',  // Đảm bảo alias 'category' trùng với alias trong phương thức associate
+                attributes: ['id', 'name']  // Chỉ lấy tên của danh mục
+            }
         })
+        // Định dạng lại dữ liệu trước khi trả về
+        const formattedData = data.map(brand => {
+            return {
+                id: brand.id,
+                name: brand.name,
+                logo: brand.logo,
+                created_at: brand.dataValues.created_at,
+                category_name: brand.category ? brand.category.name : null,
+                category_id: brand.category ? brand.category.id : null
+            };
+        });
         return {
             EC: 0,
             message: "Lấy tất cả thương hiệu thành công.",
-            data: data
+            data: formattedData,
+            statusCode: 200
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
             EC: -1,
-            message: "Lỗi trong Service!",
-            data: ''
+            message: "Có lỗi trong Service!",
+            data: '',
+            statusCode: 500
         }
     }
 }
 
 const postBrand = async (brandData) => {
     try {
-        const { brandName, brandImage } = brandData;
+        const { brandName, brandImage, category_id } = brandData;
 
-        if (!brandName || !brandImage) {
-            deleteImage(__dirname, '../uploads/brand/', brandImage)
+        // Kiểm tra nếu tên thương hiệu không có
+        if (!brandName || brandName.trim() === "") {
+            if (brandImage) {
+                deleteImage(__dirname, '../uploads/brand/', brandImage);  // Xóa ảnh nếu có
+            }
             return {
-                message: "Thiếu tham số bắt buộc!",
+                message: "Tên thương hiệu không được để trống!",
                 EC: 1,
-                data: ''
-            }
-        }
-        const checkBrandName = async () => {
-            let nameBrand = await db.brand.findOne({
-                where: { name: brandName }
-            })
-            if (nameBrand) {
-                return true
-            }
-            return false
+                data: '',
+                statusCode: 400
+            };
         }
 
-        let isnameBrandExist = await checkBrandName(brandName)
+        // Kiểm tra nếu chưa chọn hình ảnh
+        if (!brandImage) {
+            return {
+                message: "Chưa chọn hình ảnh!",
+                EC: 1,
+                data: '',
+                statusCode: 400
+            };
+        }
 
-        if (isnameBrandExist) {
-            // Xóa tệp ảnh nếu đã được tải lên trước khi kiểm tra
-            deleteImage(__dirname, '../uploads/brand/', brandImage)
+        // Kiểm tra nếu không có category_id
+        if (!category_id) {
+            if (brandImage) {
+                deleteImage(__dirname, '../uploads/brand/', brandImage);  // Xóa ảnh nếu không có category_id
+            }
+            return {
+                message: "Danh mục không được để trống!",
+                EC: 1,
+                data: '',
+                statusCode: 400
+            };
+        }
 
+        // Kiểm tra tên thương hiệu có tồn tại không
+        const checkBrandName = await db.brand.findOne({
+            where: { name: brandName }
+        });
+
+        if (checkBrandName) {
+            if (brandImage) {
+                deleteImage(__dirname, '../uploads/brand/', brandImage);  // Xóa ảnh nếu tên thương hiệu đã tồn tại
+            }
             return {
                 EC: 1,
                 message: "Tên thương hiệu đã tồn tại!",
-                data: ''
+                data: '',
+                statusCode: 409
             };
-        } else {
-            const data = await db.brand.create({
-                name: brandName,
-                logo: 'brand/' + brandImage
-            })
-            return {
-                message: "Thêm thương hiệu thành công.",
-                EC: 0,
-                data: data
-            }
         }
 
-    } catch (error) {
-        console.log(error);
-        const { brandImage } = brandData;
-        deleteImage(__dirname, '../uploads/brand/', brandImage)
+        // Tạo mới thương hiệu với category_id
+        const data = await db.brand.create({
+            name: brandName,
+            logo: 'brand/' + brandImage,  // Lưu đường dẫn ảnh
+            category_id: category_id      // Lưu category_id vào cơ sở dữ liệu
+        });
+
         return {
-            message: "Có lỗi trong service!",
-            EC: -1,
-            data: ''
+            message: "Thêm thương hiệu thành công.",
+            EC: 0,
+            data: data,
+            statusCode: 200
+        };
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+
+        // Nếu có lỗi trong quá trình tạo thương hiệu, xóa ảnh đã tải lên
+        const { brandImage } = brandData;
+        if (brandImage) {
+            deleteImage(__dirname, '../uploads/brand/', brandImage);
         }
+
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
     }
-}
+};
+
 
 const putBrand = async (brandEditData) => {
     try {
-        const { id, brandName, brandImage } = brandEditData;
+        const { id, brandName, categoryId, brandImage } = brandEditData;
 
-        if (!brandName || !brandImage) {
+        if (!brandName) {
             deleteImage(__dirname, '../uploads/brand/', brandImage)
             return {
-                message: "Thiếu tham số bắt buộc!",
+                message: "Tên thương hiệu không được để trống!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 400
+            }
+        }
+
+        if (!brandImage) {
+            deleteImage(__dirname, '../uploads/brand/', brandImage)
+            return {
+                message: "Chưa chọn hình ảnh!",
+                EC: 1,
+                data: '',
+                statusCode: 400
             }
         }
 
@@ -103,23 +164,30 @@ const putBrand = async (brandEditData) => {
         });
 
         if (idBrand) {
-            // Kiểm tra xem tên thương hiệu đã tồn tại trong cơ sở dữ liệu chưa
-            let nameExists = idBrand.name;
+            // Kiểm tra xem tên thương hiệu mới có tồn tại trong cơ sở dữ liệu nhưng không phải là thương hiệu hiện tại
+            let nameExists = await db.brand.findOne({
+                where: {
+                    name: brandName,
+                }
+            });
 
-            // Nếu tên thương hiệu đã tồn tại và không phải là thương hiệu hiện tại
-            if (nameExists && nameExists.id !== idBrand.id) {
-                deleteImage(__dirname, '../uploads/brand/', brandImage)
+            if (nameExists) {
+                deleteImage(__dirname, '../uploads/brand/', brandImage);
                 return {
                     message: 'Thương hiệu này đã tồn tại!',
                     EC: 1,
-                    data: ''
+                    data: '',
+                    statusCode: 409
                 };
             }
+
+            console.log('check category_id >>>.', categoryId);
 
             // Cập nhật thương hiệu với tên và ảnh mới (nếu có)
             const updatedbrand = await db.brand.update(
                 {
                     name: brandName,
+                    category_id: categoryId,
                     logo: brandImage ? `brand/${brandImage}` : idBrand.logo // nếu không có ảnh mới thì giữ ảnh cũ
                 },
                 {
@@ -133,26 +201,29 @@ const putBrand = async (brandEditData) => {
             return {
                 message: 'Cập nhật thương hiệu thành công!',
                 EC: 0,
-                data: updatedbrand
+                data: updatedbrand,
+                statusCode: 200
             };
         } else {
             return {
                 message: 'Thương hiệu không tồn tại!',
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 404
             };
         }
 
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
 
         const { brandImage } = brandEditData;
         deleteImage(__dirname, '../uploads/brand/', brandImage)
 
         return {
-            message: 'Có lỗi xảy ra trong quá trình cập nhật!',
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         };
     }
 };
@@ -175,6 +246,12 @@ const deleteBrand = async (id) => {
                     deleteImage(__dirname, '../uploads', brandImage)
                 } catch (err) {
                     console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
+                    return {
+                        message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
+                        data: '',
+                        EC: -1,
+                        statusCode: 404
+                    }
                 }
             }
 
@@ -184,28 +261,66 @@ const deleteBrand = async (id) => {
             return {
                 message: "Xóa thương hiệu thành công.",
                 EC: 0,
-                data: brand
+                data: brand,
+                statusCode: 200
             };
         } else {
             return {
                 message: "Thương hiệu không tồn tại.",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 404
             };
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         };
     }
 };
+
+const getBrandsByCategory = async (categoryId) => {
+    try {
+        const brands = await db.brand.findAll({
+            where: {
+                category_id: categoryId
+            }
+        })
+
+        if(!brands || brands.length === 0 ) {
+            return {
+                message: "Không tìm thấy thương hiệu nào cho danh mục này!",
+                EC: 1,
+                statusCode: 404,
+                data: []
+            }
+        }
+
+        return {
+            message: "Thành công.",
+            statusCode: 200,
+            EC: 0,
+            data: brands
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+}
 
 module.exports = {
     getAllBrand,
     postBrand,
     putBrand,
-    deleteBrand
+    deleteBrand,
+    getBrandsByCategory
 }

@@ -7,15 +7,17 @@ const CategoryController = {
     getAllCategory: async (req, res) => {
         try {
             const data = await CategoryService.getAllCategory();
-            return res.status(200).json({
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
                 EC: data.EC,
                 message: data.message,
                 data: data.data
             })
         } catch (error) {
-            console.log(error);
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
             return res.status(500).json({
-                message: "Lỗi ở Server!", //error massage
+                message: "Lỗi ở Server!",
                 EC: -1
             })
         }
@@ -31,19 +33,21 @@ const CategoryController = {
             const categoryImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
 
             const data = await CategoryService.postCategory({ categoryName, categoryImage })
-            return res.status(200).json({
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
                 EC: data.EC,
                 message: data.message,
                 data: data.data
             })
         } catch (error) {
-            console.log(error);
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
 
             const categoryImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
             deleteImage(__dirname, '../uploads/category/', categoryImage)
 
             return res.status(500).json({
-                message: "Lỗi ở Server!", //error massage
+                message: "Lỗi ở Server!",
                 EC: -1
             })
         }
@@ -57,19 +61,21 @@ const CategoryController = {
             const categoryImage = req.file ? req.file.filename : null;
 
             const data = await CategoryService.putCategory({ id, categoryName, categoryImage })
-            return res.status(200).json({
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
                 message: data.message,
                 EC: data.EC,
                 data: data.data
             })
         } catch (error) {
-            console.log(error);
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
 
             const categoryImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
             deleteImage(__dirname, '../uploads/category/', categoryImage)
-            
+
             return res.status(500).json({
-                message: "Lỗi ở Server!", //error massage
+                message: "Lỗi ở Server!",
                 EC: -1
             })
         }
@@ -80,15 +86,16 @@ const CategoryController = {
             const categoryId = req.params.id
             const data = await CategoryService.deleteCategory(categoryId)
 
-            return res.status(200).json({
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
                 message: data.message,
                 EC: data.EC,
                 data: data.data
             })
         } catch (error) {
-            console.log(error);
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
             return res.status(500).json({
-                message: "Lỗi ở Server!", //error massage
+                message: "Lỗi ở Server!",
                 EC: -1
             })
         }

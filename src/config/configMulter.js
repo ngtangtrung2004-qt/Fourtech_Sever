@@ -59,12 +59,46 @@ const upload = (folderName) => {
     })
 }
 
-export const deleteImage = (__dirname, pathImage, image) => {
-    let imagePath = path.join(__dirname, pathImage, image);
-    if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+export const deleteImage = (__dirname, pathImage, images) => {
+    if (!images) {
+        console.warn("Không có hình ảnh nào được cung cấp để xóa.");
+        return;
     }
-}
+
+    // Kiểm tra nếu images là mảng
+    if (Array.isArray(images)) {
+        images.forEach((singleImage) => {
+            if (singleImage && typeof singleImage === 'string') {
+                const imagePath = path.join(__dirname, pathImage, singleImage);
+                if (fs.existsSync(imagePath)) {
+                    try {
+                        fs.unlinkSync(imagePath);
+                        console.log(`Xóa: ${imagePath}`);
+                    } catch (error) {
+                        console.error(`Lỗi khi xóa ${imagePath}:`, error);
+                    }
+                } else {
+                    console.warn(`Không tìm thấy tập tin: ${imagePath}`);
+                }
+            }
+        });
+    } else if (typeof images === 'string') {
+        // Trường hợp images là một chuỗi, xử lý một ảnh
+        const imagePath = path.join(__dirname, pathImage, images);
+        if (fs.existsSync(imagePath)) {
+            try {
+                fs.unlinkSync(imagePath);
+                console.log(`Xóa: ${imagePath}`);
+            } catch (error) {
+                console.error(`Lỗi khi xóa ${imagePath}:`, error);
+            }
+        } else {
+            console.warn(`Không tìm thấy tập tin:: ${imagePath}`);
+        }
+    } else {
+        console.warn("Kiểu không hợp lệ cho hình ảnh. Phải là một chuỗi hoặc một mảng các chuỗi.");
+    }
+};
 
 
 export default upload

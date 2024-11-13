@@ -16,15 +16,17 @@ const getAllCategory = async () => {
         return {
             EC: 0,
             message: "Lấy tất cả danh mục thành công.",
-            data: data
+            data: data,
+            statusCode: 200
         }
 
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         }
     }
 }
@@ -37,8 +39,18 @@ const postCategory = async (categoryData) => {
             deleteImage(__dirname, '../uploads/category/', categoryImage)
             return {
                 EC: 1,
-                message: "Thiếu tham số bắt buộc!",
-                data: ''
+                message: "Tên danh mục không được bỏ trống!",
+                data: '',
+                statusCode: 400
+            }
+        }
+        if (!categoryImage) {
+            deleteImage(__dirname, '../uploads/category/', categoryImage)
+            return {
+                EC: 1,
+                message: "Chưa chọn hình ảnh!",
+                data: '',
+                statusCode: 400
             }
         }
 
@@ -61,7 +73,8 @@ const postCategory = async (categoryData) => {
             return {
                 EC: 1,
                 message: "Tên danh mục đã tồn tại!",
-                data: ''
+                data: '',
+                statusCode: 409
             };
         } else {
             const data = await db.category.create({
@@ -71,20 +84,22 @@ const postCategory = async (categoryData) => {
             return {
                 message: "Thêm danh mục thành công.",
                 EC: 0,
-                data: data
+                data: data,
+                statusCode: 200
             }
         }
 
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
 
         const { categoryImage } = categoryData;
         deleteImage(__dirname, '../uploads/category/', categoryImage)
 
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         }
     }
 }
@@ -93,20 +108,34 @@ const putCategory = async (categoryEditData) => {
     try {
         const { id, categoryName, categoryImage } = categoryEditData;
 
-        if (!categoryImage || !categoryName) {
-            deleteImage(__dirname, '../uploads/category/', categoryImage)
-
-            return {
-                EC: 1,
-                message: "Thiếu tham số bắt buộc!",
-                data: ''
-            }
-        }
-
         // Tìm danh mục theo ID
         let idCategory = await db.category.findOne({
             where: { id: id }
         });
+
+
+        if (!categoryName) {
+            deleteImage(__dirname, '../uploads/category/', categoryImage)
+
+            return {
+                EC: 1,
+                message: "Tên danh mục không được bỏ trống!",
+                data: '',
+                statusCode: 400
+            }
+        }
+
+        if (!categoryImage) {
+            deleteImage(__dirname, '../uploads/category/', categoryImage)
+
+            return {
+                EC: 1,
+                message: "Phải có hình ảnh!",
+                data: '',
+                statusCode: 400
+            }
+        }
+
 
         if (idCategory) {
             // Kiểm tra xem tên danh mục đã tồn tại trong cơ sở dữ liệu chưa
@@ -114,12 +143,13 @@ const putCategory = async (categoryEditData) => {
                 where: { name: categoryName }
             });
 
-            // Nếu tên danh mục đã tồn tại và không phải là danh mục hiện tại
-            if (nameExists && nameExists.id !== idCategory.id) {
+            if (nameExists) {
+                deleteImage(__dirname, '../uploads/category/', categoryImage);
                 return {
-                    message: 'Danh mục này đã tồn tại!',
+                    message: 'Thương hiệu này đã tồn tại!',
                     EC: 1,
-                    data: ''
+                    data: '',
+                    statusCode: 409
                 };
             }
 
@@ -139,24 +169,28 @@ const putCategory = async (categoryEditData) => {
             return {
                 message: 'Cập nhật danh mục thành công!',
                 EC: 0,
-                data: updatedCategory
+                data: updatedCategory,
+                statusCode: 200
             };
         } else {
             return {
                 message: 'Danh mục không tồn tại!',
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 404
             };
         }
 
     } catch (error) {
         const { categoryImage } = categoryEditData;
         deleteImage(__dirname, '../uploads/category/', categoryImage)
-        console.log(error);
+
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: 'Có lỗi xảy ra trong quá trình cập nhật!',
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         };
     }
 };
@@ -176,27 +210,44 @@ const deleteCategory = async (id) => {
             const categoryImage = category.image;
             deleteImage(__dirname, '../uploads/', categoryImage)
 
+            if (categoryImage) {
+                try {
+                    console.log("Tệp hình ảnh đã được xóa.");
+                } catch (err) {
+                    console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
+                    return {
+                        message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
+                        data: '',
+                        EC: -1,
+                        statusCode: 404
+                    }
+                }
+            }
+
             // Xóa danh mục khỏi cơ sở dữ liệu
             await category.destroy();
 
             return {
                 message: "Xóa danh mục thành công.",
                 EC: 0,
-                data: category
+                data: category,
+                statusCode: 200
             };
         } else {
             return {
-                message: "Danh mục không tồn tại.",
+                message: "Danh mục không tồn tại!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 404
             };
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         };
     }
 };

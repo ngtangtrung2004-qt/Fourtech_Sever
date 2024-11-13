@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
                 this.setDataValue('image', JSON.stringify(value));
             },
         },
-        base_price: DataTypes.INTEGER,
+        price: DataTypes.INTEGER,
         promotion_price: DataTypes.INTEGER,
         description: DataTypes.TEXT,
         quantity: DataTypes.INTEGER,

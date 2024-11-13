@@ -32,13 +32,15 @@ const registerService = async (dataRegister) => {
             return {
                 message: "Email đăng ký đã tồn tại!!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 409
             }
         } else if (isPhoneExist == true) {
             return {
                 message: "Số điện thoại đăng ký đã tồn tại!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 409
             }
         } else {
             const dataUser = await db.user.create({
@@ -51,14 +53,16 @@ const registerService = async (dataRegister) => {
             return {
                 message: "Đăng ký thành công.",
                 EC: 0,
-                data: ''
+                data: '',
+                statusCode: 200
             }
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
-            EC: -1
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            statusCode: 500
         }
     }
 }
@@ -93,13 +97,15 @@ const loginService = async (dataLogin) => {
                     EC: 0,
                     data: {
                         access_token: jwtToken,
-                    }
+                    },
+                    statusCode: 200
                 }
             } else {
                 return {
                     message: "Email/Sđt hoặc mật khẩu không đúng!",
                     EC: 1,
-                    data: ''
+                    data: '',
+                    statusCode: 401
                 }
             }
 
@@ -107,16 +113,18 @@ const loginService = async (dataLogin) => {
             return {
                 message: "Tài khoản chưa được đăng ký!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 404
             }
         }
 
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         }
     }
 }
@@ -133,14 +141,16 @@ const getAllUser = async () => {
         return {
             message: "Lấy tất cả người dùng thành công.",
             EC: 0,
-            data: data
+            data: data,
+            statusCode: 200
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         }
     }
 }
@@ -157,21 +167,24 @@ const deleteService = async (id) => {
             return ({
                 message: "Xóa tài khoản thành công.",
                 EC: 0,
-                data: ''
+                data: '',
+                statusCode: 200
             })
         } else {
             return ({
                 message: "Xóa tài khoản thất bại!",
                 EC: 1,
-                data: ''
+                data: '',
+                statusCode: 500
             })
         }
     } catch (error) {
-        console.log(error);
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong service!",
+            message: "Có lỗi trong Service!",
             EC: -1,
-            data: ''
+            data: '',
+            statusCode: 500
         }
     }
 }
