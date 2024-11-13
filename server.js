@@ -7,7 +7,12 @@ import cors from 'cors'
 import authRouter from './src/routers/authRouter'
 import categoryRouter from './src/routers/categoryRouter'
 import productRouter from './src/routers/productRouter'
+<<<<<<< HEAD
 import brandRouter from './src/routers/brandRouter'
+=======
+import contactRouter from './src/routers/contactRouter'
+import brandRouter from './src/routers/brand'
+>>>>>>> ef795d1a7f7b2144b2a911f806e44a115a363692
 import imageRouter from './src/routers/imageRouter'
 
 import cookieParser from 'cookie-parser';
@@ -44,6 +49,9 @@ app.use('/api/', categoryRouter);
 app.use('/api/', productRouter);
 app.use('/api/', brandRouter);
 app.use('/api/', imageRouter);
+
+//
+app.use('/api', contactRouter);
 
 app.use((req, res) => {
   return res.send('404 Not Found')
