@@ -14,16 +14,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'brand_id',
                 as: 'productData'
             })
-            brand.belongsTo(models.category, {
-                foreignKey: 'category_id',  // Khóa ngoại trong bảng Brand
-                as: 'category'              // Tên alias khi truy vấn
-            });
         }
     }
     brand.init({
         name: DataTypes.STRING,
-        logo: DataTypes.STRING,
-        category_id: DataTypes.INTEGER,
+        logo: DataTypes.STRING
     }, {
         sequelize,
         modelName: 'brand',

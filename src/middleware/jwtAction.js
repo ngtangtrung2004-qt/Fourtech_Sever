@@ -4,54 +4,47 @@ require('dotenv').config()
 
 export const createJWT = (payload) => {
     const secretKey = process.env.JWT_SECRET;
+    const expiresIn = process.env.JWT_EXPRIRES;
     let token = null;
 
     try {
-        token = jwt.sign(payload, secretKey, { expiresIn: '2d' }) //sau 2 ngày sẽ không dùng được token này nữa 
+        token = jwt.sign(payload, secretKey, { expiresIn: expiresIn })
     } catch (error) {
         console.log(error);
     }
     return token
 }
 
-export const verifyToken = (token) => {
-    const secretKey = process.env.JWT_SECRET;
-    let decoded = null;
-    try {
-        decoded = jwt.verify(token, secretKey);
-    } catch (error) {
-        console.log(error);
+export const auth = (req, res, next) => {
+    const white_lists = ['/', '/register', '/login', '/category', '/brand', '/product']
+    console.log('check req>>>', req.originalUrl);
+    if (white_lists.find(item => '/api' + item === req.originalUrl)) {
+        next()
+    } else {
+        if (req.headers && req.headers.authorization) {
+            const token = req.headers.authorization.split(' ')[1]
+
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET)
+                console.log('check Token>>>', decoded);
+                next();
+            } catch (error) {
+                return res.status(401).json({
+                    message: "Token hết hạn hoặc không hợp lệ!",
+                    data: '',
+                    EC: 1
+                })
+            }
+        } else {
+            return res.status(401).json({
+                message: "Bạn chưa truyền Access Token ở header / Hoặc Token bị hết hạn!",
+                data: '',
+                EC: -1
+            })
+        }
     }
-    return decoded
 }
 
-// export const checkUserJWT = (req, res, next) => {
-//     let cookies = req.cookies;
-
-//     if (cookies && cookies.jwt) {
-//         let token = cookies.jwt
-//         let decoded = verifyToken(token)
-
-//         if (decoded) {
-//             req.user = decoded
-//             next()
-//         } else {
-//             return res.status(401).json({
-//                 EC: -1,
-//                 data: '',
-//                 message: "Người dùng chưa được xác thực"
-//             })
-//         }
-
-//         console.log('my cookie>>>>', token);
-//     } else {
-//         return res.status(401).json({
-//             EC: -1,
-//             data: '',
-//             message: "Người dùng chưa được xác thực"
-//         })
-//     }
-// }
 
 // export const checkUserPermission = (req, res, next) => {
 //     if(req.user) {

@@ -1,7 +1,10 @@
 import express from 'express'
 import AuthControler from '../controllers/authController';
+import { auth } from '../middleware/jwtAction';
 
 const router = express.Router();
+
+router.all('*', auth)
 
 router.post('/register', AuthControler.handleRegsiter);
 router.post('/login', AuthControler.handleLogin);

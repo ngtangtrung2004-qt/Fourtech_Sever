@@ -1,4 +1,4 @@
-import { deleteImage } from '../config/configMulter';
+import { deleteImage } from '../middleware/multer';
 import * as BrandService from '../services/brand'
 
 const BrandController = {
@@ -55,10 +55,9 @@ const BrandController = {
         try {
             const id = req.params.id
             const brandName = req.body.brandName;
-            const categoryId = req.body.category_id;
             const brandImage = req.file ? req.file.filename : null;
 
-            const data = await BrandService.putBrand({ id, brandName, categoryId, brandImage })
+            const data = await BrandService.putBrand({ id, brandName, brandImage })
 
             const statusCode = data.statusCode
             return res.status(statusCode).json({
@@ -98,28 +97,6 @@ const BrandController = {
             })
         }
     },
-
-
-    getBrandsByCategory: async (req, res) => {
-        try {
-            const { categoryId } = req.params
-
-            const data = await BrandService.getBrandsByCategory(categoryId)
-
-            const statusCode = data.statusCode
-            return res.status(statusCode).json({
-                message: data.message,
-                EC: data.EC,
-                data: data.data
-            })
-        } catch (error) {
-            console.log('CÓ LỖI TRONG SERVER >>>', error);
-            return res.status(500).json({
-                message: "Lỗi ở Server!",
-                EC: -1
-            })
-        }
-    }
 }
 
 module.exports = BrandController;

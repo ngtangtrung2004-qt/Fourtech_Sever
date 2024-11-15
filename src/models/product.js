@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         brand_id: DataTypes.INTEGER,
         image: {
             type: DataTypes.TEXT,
-            allowNull: true,
+            allowNull: false,
             get() {
                 const rawValue = this.getDataValue('image');
                 return rawValue ? JSON.parse(rawValue) : [];

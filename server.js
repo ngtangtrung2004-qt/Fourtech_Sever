@@ -8,7 +8,7 @@ import authRouter from './src/routers/authRouter'
 import categoryRouter from './src/routers/categoryRouter'
 import productRouter from './src/routers/productRouter'
 import contactRouter from './src/routers/contactRouter'
-import brandRouter from './src/routers/brand'
+import brandRouter from './src/routers/brandRouter'
 import imageRouter from './src/routers/imageRouter'
 
 import cookieParser from 'cookie-parser';

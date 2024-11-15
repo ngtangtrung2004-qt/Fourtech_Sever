@@ -1,7 +1,7 @@
 import * as CategoryService from '../services/category'
 import path from 'path'
 import fs from 'fs'
-import { deleteImage } from '../config/configMulter';
+import { deleteImage } from '../middleware/multer';
 
 const CategoryController = {
     getAllCategory: async (req, res) => {
@@ -99,7 +99,8 @@ const CategoryController = {
                 EC: -1
             })
         }
-    }
+    },
+
 }
 
 module.exports = CategoryController;

@@ -97,6 +97,11 @@ const loginService = async (dataLogin) => {
                     EC: 0,
                     data: {
                         access_token: jwtToken,
+                        dataUser: {
+                            full_name: user.full_name,
+                            name: user.name,
+                            role: user.role
+                        }
                     },
                     statusCode: 200
                 }

@@ -29,23 +29,23 @@ module.exports = {
                     key: 'id'
                 }
             },
+            image: {
+                type: Sequelize.TEXT,
+                allowNull: false
+            },
             price: {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
             promotion_price: {
                 type: Sequelize.INTEGER,
+                defaultValue: 0
             },
             description: {
                 type: Sequelize.TEXT,
-                allowNull: false
+                allowNull: true
             },
             quantity: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                defaultValue: 0
-            },
-            status: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 defaultValue: 0

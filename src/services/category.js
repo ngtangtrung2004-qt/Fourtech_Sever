@@ -2,7 +2,7 @@ import { where } from "sequelize";
 import db from "../models"
 import path from 'path'
 import fs from 'fs'
-import { deleteImage } from "../config/configMulter";
+import { deleteImage } from "../middleware/multer";
 
 const getAllCategory = async () => {
     try {
@@ -19,7 +19,6 @@ const getAllCategory = async () => {
             data: data,
             statusCode: 200
         }
-
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
@@ -34,89 +33,84 @@ const getAllCategory = async () => {
 const postCategory = async (categoryData) => {
     try {
         const { categoryName, categoryImage } = categoryData;
-
-        if (!categoryName || !categoryImage) {
-            deleteImage(__dirname, '../uploads/category/', categoryImage)
+        if (!categoryName || categoryName.trim() === "") {
+            if (categoryImage) {
+                deleteImage(__dirname, '../uploads/category/', categoryImage);  // Xóa ảnh nếu có
+            }
             return {
+                message: "Tên danh mục không được để trống!",
                 EC: 1,
-                message: "Tên danh mục không được bỏ trống!",
                 data: '',
                 statusCode: 400
-            }
+            };
         }
+
+        // Kiểm tra nếu chưa chọn hình ảnh
         if (!categoryImage) {
-            deleteImage(__dirname, '../uploads/category/', categoryImage)
             return {
-                EC: 1,
                 message: "Chưa chọn hình ảnh!",
+                EC: 1,
                 data: '',
                 statusCode: 400
-            }
+            };
         }
 
-        const checkCategoryName = async () => {
-            let nameCategory = await db.category.findOne({
-                where: { name: categoryName }
-            })
-            if (nameCategory) {
-                return true
+        // Kiểm tra tên danh mục có tồn tại không
+        const checkCategoryName = await db.category.findOne({
+            where: { name: categoryName }
+        });
+
+        if (checkCategoryName) {
+            if (categoryImage) {
+                deleteImage(__dirname, '../uploads/category/', categoryImage);
             }
-            return false
-        }
-
-        let isNameCategoryExist = await checkCategoryName(categoryName)
-
-        if (isNameCategoryExist) {
-
-            deleteImage(__dirname, '../uploads/category/', categoryImage)
-
             return {
                 EC: 1,
                 message: "Tên danh mục đã tồn tại!",
                 data: '',
                 statusCode: 409
             };
-        } else {
-            const data = await db.category.create({
-                name: categoryName,
-                image: 'category/' + categoryImage
-            })
-            return {
-                message: "Thêm danh mục thành công.",
-                EC: 0,
-                data: data,
-                statusCode: 200
-            }
         }
 
+        const data = await db.category.create({
+            name: categoryName,
+            image: 'category/' + categoryImage,  // Lưu đường dẫn ảnh
+        });
+
+        return {
+            message: "Thêm danh mục thành công.",
+            EC: 0,
+            data: data,
+            statusCode: 200
+        };
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
 
+        // Nếu có lỗi trong quá trình tạo danh mục, xóa ảnh đã tải lên
         const { categoryImage } = categoryData;
-        deleteImage(__dirname, '../uploads/category/', categoryImage)
+        if (categoryImage) {
+            deleteImage(__dirname, '../uploads/category/', categoryImage);
+        }
 
         return {
             message: "Có lỗi trong Service!",
             EC: -1,
             data: '',
             statusCode: 500
-        }
+        };
     }
 }
 
 const putCategory = async (categoryEditData) => {
     try {
         const { id, categoryName, categoryImage } = categoryEditData;
-
         // Tìm danh mục theo ID
         let idCategory = await db.category.findOne({
             where: { id: id }
         });
 
-
         if (!categoryName) {
             deleteImage(__dirname, '../uploads/category/', categoryImage)
-
             return {
                 EC: 1,
                 message: "Tên danh mục không được bỏ trống!",
@@ -127,7 +121,6 @@ const putCategory = async (categoryEditData) => {
 
         if (!categoryImage) {
             deleteImage(__dirname, '../uploads/category/', categoryImage)
-
             return {
                 EC: 1,
                 message: "Phải có hình ảnh!",
@@ -140,13 +133,13 @@ const putCategory = async (categoryEditData) => {
         if (idCategory) {
             // Kiểm tra xem tên danh mục đã tồn tại trong cơ sở dữ liệu chưa
             let nameExists = await db.category.findOne({
-                where: { name: categoryName }
+                where: { name: categoryName, id: { [db.Sequelize.Op.ne]: id } }
             });
 
             if (nameExists) {
                 deleteImage(__dirname, '../uploads/category/', categoryImage);
                 return {
-                    message: 'Thương hiệu này đã tồn tại!',
+                    message: 'Danh mục này đã tồn tại!',
                     EC: 1,
                     data: '',
                     statusCode: 409
@@ -157,7 +150,7 @@ const putCategory = async (categoryEditData) => {
             const updatedCategory = await db.category.update(
                 {
                     name: categoryName,
-                    image: categoryImage ? `category/${categoryImage}` : idCategory.image // nếu không có ảnh mới thì giữ ảnh cũ
+                    image: categoryImage ? `category/${categoryImage}` : idCategory.image
                 },
                 {
                     where: { id: idCategory.id }
@@ -251,6 +244,7 @@ const deleteCategory = async (id) => {
         };
     }
 };
+
 
 module.exports = {
     getAllCategory,

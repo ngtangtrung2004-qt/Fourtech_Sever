@@ -1,31 +1,3 @@
-// import multer from "multer";
-// import path from 'path'
-
-// const storage = multer.diskStorage({
-//     destination: (req, file, callback) => {
-//         if (file.mimetype === 'image/jpg' ||
-//             file.mimetype === 'image/png' ||
-//             file.mimetype === 'image/jpeg' ||
-//             file.mimetype === 'image/webp') {
-//             let uploadPath = path.join(__dirname, '../uploads/')
-//             console.log(uploadPath);
-//             callback(null, uploadPath)
-//         } else {
-//             callback(new Error("Ảnh chưa đúng định dạng .jpg, .png, jpeg, .webp"), false)
-//         }
-//     },
-//     filename: (req, file, cb) => {
-//         const newFileName = `${Date.now()}-${file.originalname}`
-//         cb(null, newFileName)
-//     }
-// })
-
-// const upload = multer({
-//     storage: storage
-// })
-
-// export default upload
-
 import multer from "multer";
 import path from 'path'
 import fs from "fs";
@@ -38,6 +10,7 @@ const upload = (folderName) => {
             if (file.mimetype === 'image/jpg' ||
                 file.mimetype === 'image/png' ||
                 file.mimetype === 'image/jpeg' ||
+                file.mimetype === 'image/gif' ||
                 file.mimetype === 'image/webp') {
                 // Tạo đường dẫn thư mục tải lên động
                 const uploadPath = path.join(__dirname, `../uploads/${folderName}`);
@@ -45,7 +18,7 @@ const upload = (folderName) => {
                 fs.mkdirSync(uploadPath, { recursive: true });
                 callback(null, uploadPath)
             } else {
-                callback(new Error("Ảnh chưa đúng định dạng .jpg, .png, jpeg, .webp"), false)
+                callback(new Error("Chỉ chấp nhận các định dạng ảnh .jpg, .png, jpeg, .webp, .gif !!!!"), false)
             }
         },
         filename: (req, file, cb) => {
@@ -55,9 +28,34 @@ const upload = (folderName) => {
     })
 
     return multer({
-        storage: storage
+        storage: storage,
+        limits: {
+            files: 5
+        }
     })
 }
+
+export const multerErrorHandler = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Lỗi khi vượt quá số lượng tệp cho phép
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({ message: 'Vượt quá số lượng ảnh cho phép (tối đa 5 ảnh)!' });
+        }
+        // Lỗi khi vượt quá kích thước tệp cho phép
+        // if (err.code === 'LIMIT_FILE_SIZE') {
+        //     return res.status(400).json({ message: 'Kích thước tệp vượt quá giới hạn (tối đa 5MB).' });
+        // }
+        // Lỗi khi có vấn đề với tệp
+        if (err.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({ message: 'Vượt quá số lượng ảnh cho phép (tối đa 5 ảnh)!' });
+        }
+    }
+
+    // Nếu lỗi không phải từ multer, hoặc không phải lỗi có mã xác định
+    return res.status(400).json({ message: 'Đã xảy ra lỗi khi xử lý tệp.', error: err.message });
+    return res.status(500).json({ message: 'Đã xảy ra lỗi khi xử lý tệp.', error: err.message });
+};
+
 
 export const deleteImage = (__dirname, pathImage, images) => {
     if (!images) {
