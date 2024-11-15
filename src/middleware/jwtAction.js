@@ -16,7 +16,7 @@ export const createJWT = (payload) => {
 }
 
 export const auth = (req, res, next) => {
-    const white_lists = ['/', '/register', '/login', '/category', '/brand', '/product']
+    const white_lists = ['/', '/register', '/login', '/category', '/brand', '/product','/forgot-password','/reset-password']
     console.log('check req>>>', req.originalUrl);
     if (white_lists.find(item => '/api' + item === req.originalUrl)) {
         next()
