@@ -33,7 +33,7 @@ const postBrand = async (brandData) => {
     try {
         const { brandName, brandImage } = brandData;
 
-        if (!brandName || !brandImage) {
+        if (!brandName) {
             deleteImage(__dirname, '../uploads/brand/', brandImage)
             return {
                 EC: 1,
@@ -209,16 +209,12 @@ const deleteBrand = async (id) => {
             const brandImage = brand.logo;
 
             if (brandImage) {
-                try {
-                    deleteImage(__dirname, '../uploads', brandImage)
-                } catch (err) {
-                    console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
-                    return {
-                        message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
-                        data: '',
-                        EC: -1,
-                        statusCode: 404
-                    }
+                console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
+                return {
+                    message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
+                    data: '',
+                    EC: -1,
+                    statusCode: 404
                 }
             }
 

@@ -87,7 +87,7 @@ const loginService = async (dataLogin) => {
 
             if (isConrrectPassword == true) {
                 let jwtToken = createJWT({
-                    id: user.id,
+                    avatar: user.avatar,
                     full_name: user.full_name,
                     email: user.email,
                     role: user.role
@@ -97,11 +97,10 @@ const loginService = async (dataLogin) => {
                     EC: 0,
                     data: {
                         access_token: jwtToken,
-                        dataUser: {
-                            full_name: user.full_name,
-                            name: user.name,
-                            role: user.role
-                        }
+                        avatar: user.avatar,
+                        full_name: user.full_name,
+                        email: user.email,
+                        role: user.role
                     },
                     statusCode: 200
                 }
@@ -110,7 +109,7 @@ const loginService = async (dataLogin) => {
                     message: "Email/Sđt hoặc mật khẩu không đúng!",
                     EC: 1,
                     data: '',
-                    statusCode: 401
+                    statusCode: 404
                 }
             }
 

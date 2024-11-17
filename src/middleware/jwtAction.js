@@ -1,6 +1,21 @@
 import jwt from 'jsonwebtoken'
 require('dotenv').config()
 
+const white_lists = [
+    '/',
+    '/register',
+    '/login',
+    '/logout',
+    '/forgot-password',
+    '/reset-password',
+    '/brand',
+    '/brand/:id',
+    '/category',
+    '/category/:id',
+    '/product',
+    'product/:id',
+    'product/:id/increase-view',
+]
 
 export const createJWT = (payload) => {
     const secretKey = process.env.JWT_SECRET;
@@ -15,46 +30,64 @@ export const createJWT = (payload) => {
     return token
 }
 
-export const auth = (req, res, next) => {
-    const white_lists = ['/', '/register', '/login', '/category', '/brand', '/product','/forgot-password','/reset-password','/contact','/reply']
-    console.log('check req>>>', req.originalUrl);
-    if (white_lists.find(item => '/api' + item === req.originalUrl)) {
-        next()
-    } else {
-        if (req.headers && req.headers.authorization) {
-            const token = req.headers.authorization.split(' ')[1]
+export const verifyToken = (token) => {
+    const secretKey = process.env.JWT_SECRET;
+    let decoded = null;
+    try {
+        decoded = jwt.verify(token, secretKey);
+    } catch (error) {
+        console.log(error);
+    }
+    return decoded
+}
 
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET)
-                console.log('check Token>>>', decoded);
-                next();
-            } catch (error) {
-                return res.status(401).json({
-                    message: "Token hết hạn hoặc không hợp lệ!",
-                    data: '',
-                    EC: 1
-                })
-            }
+export const checkUserJWT = (req, res, next) => {
+    if (white_lists.includes(req.path)) return next();
+    let cookies = req.cookies;
+    if (cookies && cookies.jwt) {
+        let token = cookies.jwt
+        let decoded = verifyToken(token)
+        if (decoded) {
+            req.user = decoded
+            req.token = token
+            next()
         } else {
             return res.status(401).json({
-                message: "Bạn chưa truyền Access Token ở header / Hoặc Token bị hết hạn!",
+                EC: -1,
                 data: '',
-                EC: -1
+                message: "Token không đúng hoặc hết hạn!"
             })
         }
+        console.log('my cookie>>>>', token);
+    } else {
+        return res.status(401).json({
+            EC: -1,
+            data: '',
+            message: "Chưa xác thực người dùng!"
+        })
     }
 }
 
 
-// export const checkUserPermission = (req, res, next) => {
-//     if(req.user) {
-//         let email = req.user.email
-//         let role = req.user.role
-//     } else {
-//         return res.status(401).json({
-//             EC: -1,
-//             data: '',
-//             message: "Người dùng chưa được xác thực"
-//         })
-//     }
-// }
+
+export const checkUserPermission = (req, res, next) => {
+    if (white_lists.includes(req.path) || req.path === '/account') return next()
+    if (req.user) {
+        let role = req.user.role
+        if (role === 'admin') {
+            return next()
+        } else {
+            return res.status(401).json({
+                EC: -1,
+                data: '',
+                message: "Bạn không có quyền truy cập!"
+            })
+        }
+    } else {
+        return res.status(401).json({
+            EC: -1,
+            data: '',
+            message: "Chưa xác thực người dùng!"
+        })
+    }
+}

@@ -1,11 +1,11 @@
 import express from "express";
 import ProductController from "../controllers/productController";
 import upload, { multerErrorHandler } from "../middleware/multer";
-import { auth } from "../middleware/jwtAction";
+import { auth, checkUserJWT } from "../middleware/jwtAction";
 
 const router = express.Router();
 
-router.all('*', auth)
+router.all('*', checkUserJWT)
 
 router.get('/product', ProductController.getAllProduct);
 router.get('/product/:id', ProductController.getOneProduct);

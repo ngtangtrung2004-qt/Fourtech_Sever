@@ -199,7 +199,7 @@ const putProduct = async (dataProduct) => {
                 statusCode: 400
             }
         }
-        if (!imageProduct && imageProduct.length === 0) {
+        if (imageProduct.length === 0) {
             deleteImage(__dirname, '../uploads/product/', imageProduct)
             return {
                 message: 'Không có tệp hình ảnh nào được tải lên!',

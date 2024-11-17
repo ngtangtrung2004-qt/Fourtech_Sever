@@ -1,12 +1,12 @@
 import express from 'express';
 import BrandController from '../controllers/brandController';
 import upload, { multerErrorHandler } from '../middleware/multer';
-import { auth } from '../middleware/jwtAction';
+import { auth, checkUserJWT } from '../middleware/jwtAction';
 
 
 const router = express.Router()
 
-router.all('*', auth)
+router.all('*', checkUserJWT)
 
 router.get('/brand', BrandController.getAllBrand);
 router.get('/brand/:id', BrandController.getOneBrand);
