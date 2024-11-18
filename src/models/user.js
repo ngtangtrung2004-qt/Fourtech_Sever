@@ -40,7 +40,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'user',
     tableName: 'user',
     timestamps: true,
-    underscored: true
+    underscored: true,
+    paranoid: true
   });
   return user;
 };

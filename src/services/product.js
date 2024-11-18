@@ -7,6 +7,8 @@ const getAllProduct = async () => {
     try {
         const data = await db.product.findAll({
             attributes: ['id', 'name', 'category_id', 'brand_id', 'image', 'price', 'promotion_price', 'description', 'quantity', 'view', 'created_at'],
+            // where: { deleted_at: null },
+            paranoid: true,
             include: [
                 {
                     model: db.brand,
@@ -48,8 +50,65 @@ const getAllProduct = async () => {
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
 
-        const { imageProduct } = dataProduct
-        deleteImage(__dirname, '../uploads/product/', imageProduct)
+        return {
+            message: "Có lỗi trong Service!",
+            data: '',
+            EC: -1,
+            statusCode: 500
+        }
+    }
+}
+
+const getAllProductTrash = async () => {
+    try {
+        const data = await db.product.findAll({
+            attributes: ['id', 'name', 'category_id', 'brand_id', 'image', 'price', 'promotion_price', 'description', 'quantity', 'view', 'created_at'],
+            where: {
+                deleted_at: {
+                    [db.Sequelize.Op.ne]: null // Lấy các bản ghi có `deleted_at` khác `null`
+                }
+            },
+            paranoid: false,
+            include: [
+                {
+                    model: db.brand,
+                    as: 'brandData',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: db.category,
+                    as: 'categoryData',
+                    attributes: ['id', 'name']
+                }
+            ]
+        })
+
+        const formatterData = data.map((pro) => {
+            return {
+                id: pro.id,
+                name: pro.name,
+                category_id: pro.category_id,
+                category_name: pro.categoryData ? pro.categoryData.name : null, // Lấy tên sản phẩm nếu tồn tại
+                brand_id: pro.brand_id,
+                brand_name: pro.brandData ? pro.brandData.name : null, // Lấy tên thương hiệu nếu tồn tại
+                image: pro.image,
+                price: pro.price,
+                promotion_price: pro.promotion_price,
+                description: pro.description,
+                quantity: pro.quantity,
+                view: pro.view,
+                created_at: pro.dataValues.created_at
+            };
+        })
+
+        return {
+            data: formatterData,
+            EC: 0,
+            statusCode: 200,
+            message: "Lấy tất cả sản phẩm đã xóa thành công."
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
 
         return {
             message: "Có lỗi trong Service!",
@@ -273,7 +332,7 @@ const putProduct = async (dataProduct) => {
     }
 }
 
-const deleteProduct = async (id) => {
+const deleteSoftProduct = async (id) => {
     try {
         // Tìm sản phẩm trong cơ sở dữ liệu
         const product = await db.product.findOne({
@@ -283,7 +342,86 @@ const deleteProduct = async (id) => {
         });
 
         if (product) {
-            // Lấy tên tệp hình ảnh
+            // Xóa sản phẩm khỏi cơ sở dữ liệu
+            await product.destroy({
+                where: { id: product }
+            });
+
+            return {
+                message: "Xóa sản phẩm thành công.",
+                EC: 0,
+                data: product,
+                statusCode: 200
+            };
+        } else {
+            return {
+                message: "Sản phẩm không tồn tại!",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            };
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+};
+
+const restoreProduct = async (id) => {
+    try {
+        // Tìm sản phẩm trong cơ sở dữ liệu
+        const product = await db.product.findOne({
+            where: {
+                id: id,
+            },
+            paranoid: false
+        });
+
+        console.log(product);
+
+        if (product) {
+            // Khôi phục sản phẩm
+            await product.restore();
+
+            return {
+                message: "Khôi phục sản phẩm thành công.",
+                EC: 0,
+                data: product,
+                statusCode: 200
+            };
+        } else {
+            return {
+                message: "Sản phẩm không tồn tại!",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            };
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+};
+
+const deleteProduct = async (id) => {
+    try {
+        // Tìm sản phẩm trong cơ sở dữ liệu
+        const product = await db.product.findOne({
+            where: { id: id },
+            paranoid: false, // Để lấy cả các bản ghi đã bị xóa mềm
+        });
+
+        if (product) {
             const productImage = product.image;
             deleteImage(__dirname, '../uploads/', productImage)
 
@@ -300,12 +438,14 @@ const deleteProduct = async (id) => {
                     }
                 }
             }
-
             // Xóa sản phẩm khỏi cơ sở dữ liệu
-            await product.destroy();
+            await product.destroy({
+                where: { id: product },
+                force: true
+            });
 
             return {
-                message: "Xóa sản phẩm thành công.",
+                message: "Xóa sản phẩm vĩnh viễn thành công.",
                 EC: 0,
                 data: product,
                 statusCode: 200
@@ -362,9 +502,12 @@ const postView = async (id) => {
 
 module.exports = {
     getAllProduct,
+    getAllProductTrash,
     getOneProduct,
     postProduct,
     putProduct,
+    deleteSoftProduct,
+    restoreProduct,
     deleteProduct,
     postView
 }

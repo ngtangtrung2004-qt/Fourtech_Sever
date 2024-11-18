@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
         modelName: 'order_detail',
         tableName: 'order_detail',
         timestamps: true,
-        underscored: true
+        underscored: true,
+        paranoid: true
     });
     return order_detail;
 };
