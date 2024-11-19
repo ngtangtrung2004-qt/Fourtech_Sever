@@ -6,13 +6,10 @@ import { checkUserJWT, checkUserPermission } from '../middleware/jwtAction';
 
 const router = express.Router();
 
-
-router.all('*', checkUserJWT)
 router.get('/category', CategoryController.getAllCategory);
-
 router.get('/category/:id', CategoryController.getOneCategory);
-router.post('/category/create', upload('category').single('categoryImage'), checkUserPermission, CategoryController.postCategory, multerErrorHandler);
-router.put('/category/update/:id', upload('category').single('categoryImage'), checkUserPermission, CategoryController.putCategory, multerErrorHandler);
-router.delete('/category/delete/:id', CategoryController.deleteCategory);
+router.post('/category/create', checkUserJWT, checkUserPermission, upload('category').single('categoryImage'), checkUserPermission, CategoryController.postCategory, multerErrorHandler);
+router.put('/category/update/:id', checkUserJWT, checkUserPermission, upload('category').single('categoryImage'), checkUserPermission, CategoryController.putCategory, multerErrorHandler);
+router.delete('/category/delete/:id', checkUserJWT, checkUserPermission, CategoryController.deleteCategory);
 
 module.exports = router

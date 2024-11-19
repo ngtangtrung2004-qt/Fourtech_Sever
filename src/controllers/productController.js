@@ -26,6 +26,27 @@ const ProductController = {
 
     },
 
+    getAllProductTrash: async (req, res) => {
+        try {
+
+            const data = await ProductService.getAllProductTrash()
+            const statusCode = data.statusCode;
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+
+    },
+
     getOneProduct: async (req, res) => {
         try {
             const idProduct = req.params.id
@@ -99,6 +120,46 @@ const ProductController = {
         }
     },
 
+    deleteSoftProduct: async (req, res) => {
+        try {
+            const productId = req.params.id
+            const data = await ProductService.deleteSoftProduct(productId)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
+    restoreProduct: async (req, res) => {
+        try {
+            const productId = req.params.id
+            const data = await ProductService.restoreProduct(productId)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
     deleteProduct: async (req, res) => {
         try {
             const productId = req.params.id
@@ -122,6 +183,7 @@ const ProductController = {
     postView: async (req, res) => {
         try {
             const productId = req.params.id;
+
             const data = await ProductService.postView(productId)
 
             const statusCode = data.statusCode
@@ -131,10 +193,6 @@ const ProductController = {
             })
         } catch (error) {
             console.log('CÓ LỖI TRONG SERVER >>>', error);
-
-            const imageProduct = req.files ? req.files.map(file => file.filename) : null;
-            deleteImage(__dirname, '../uploads/product/', imageProduct)
-
             return res.status(500).json({
                 message: "Lỗi ở Server!",
                 EC: -1

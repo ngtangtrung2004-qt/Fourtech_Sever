@@ -87,6 +87,7 @@ const loginService = async (dataLogin) => {
 
             if (isConrrectPassword == true) {
                 let jwtToken = createJWT({
+                    id: user.id,
                     avatar: user.avatar,
                     full_name: user.full_name,
                     email: user.email,
@@ -97,6 +98,7 @@ const loginService = async (dataLogin) => {
                     EC: 0,
                     data: {
                         access_token: jwtToken,
+                        id: user.id,
                         avatar: user.avatar,
                         full_name: user.full_name,
                         email: user.email,

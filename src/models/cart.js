@@ -31,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
         modelName: 'cart',
         tableName: 'cart',
         timestamps: true,
-        underscored: true
+        underscored: true,
+        paranoid: true
     });
     return cart;
 };

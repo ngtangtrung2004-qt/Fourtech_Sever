@@ -209,7 +209,7 @@ const deleteBrand = async (id) => {
             const brandImage = brand.logo;
 
             if (brandImage) {
-                console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
+                console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:");
                 return {
                     message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
                     data: '',
