@@ -14,4 +14,6 @@ router.post('/product/:id/increase-view', ProductController.postView);
 router.put('/product/update/:id', upload('product').array('image', 5), ProductController.putProduct, multerErrorHandler);
 router.delete('/product/delete/:id', ProductController.deleteProduct);
 
+// router.get('/search',ProductController.searchProduct)
+
 module.exports = router;

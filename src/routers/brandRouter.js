@@ -6,7 +6,7 @@ import { auth, checkUserJWT } from '../middleware/jwtAction';
 
 const router = express.Router()
 
-router.all('*', checkUserJWT)
+// router.all('*', checkUserJWT)
 
 router.get('/brand', BrandController.getAllBrand);
 router.get('/brand/:id', BrandController.getOneBrand);

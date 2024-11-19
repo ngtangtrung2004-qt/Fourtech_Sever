@@ -10,6 +10,7 @@ import productRouter from './src/routers/productRouter'
 import contactRouter from './src/routers/contactRouter'
 import brandRouter from './src/routers/brandRouter'
 import imageRouter from './src/routers/imageRouter'
+import passwordController from './src/routers/passwordController'
 
 import cookieParser from 'cookie-parser';
 import path from 'path'
@@ -48,6 +49,8 @@ app.use('/api/', imageRouter);
 
 //
 app.use('/api', contactRouter);
+//
+app.use('/api', passwordController);
 
 app.use((req, res) => {
   return res.send('404 Not Found')

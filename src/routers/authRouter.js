@@ -1,10 +1,10 @@
 import express from 'express'
 import AuthControler from '../controllers/authController';
+// const AuthControler = require('../controllers/authController');
 import { auth, checkUserJWT, checkUserPermission } from '../middleware/jwtAction';
 
 const router = express.Router();
-
-router.all('*', checkUserJWT, checkUserPermission)
+// router.all('*', checkUserJWT, checkUserPermission)
 
 router.post('/register', AuthControler.handleRegsiter);
 router.post('/login', AuthControler.handleLogin);
@@ -14,8 +14,6 @@ router.get('/all-user', AuthControler.getAllUser);
 router.delete('/delete-user/:id', AuthControler.deleteUser);
 
 
-router.post('/forgot-password', AuthControler.forgotPassword);
-router.post('/reset-password', AuthControler.resetPassword);
 
 
 module.exports = router;
