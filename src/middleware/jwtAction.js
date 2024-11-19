@@ -1,22 +1,22 @@
 import jwt from 'jsonwebtoken'
 require('dotenv').config()
 
-const white_lists = [
-    '/',
-    '/register',
-    '/login',
-    '/logout',
-    '/forgot-password',
-    '/reset-password',
-    '/brand',
-    '/brand/:id',
-    '/category',
-    '/category/:id',
-    '/product',
-    'product/:id',
-    'product/:id/increase-view',
-    '/contact'
-]
+// const white_lists = [
+//     '/',
+//     '/register',
+//     '/login',
+//     '/logout',
+//     '/forgot-password',
+//     '/reset-password',
+//     '/brand',
+//     '/brand/:id',
+//     '/category',
+//     '/category/:id',
+//     '/product',
+//     '/product/:id',
+//     '/product/increase-view/:id',
+//     '/contact'
+// ]
 
 export const createJWT = (payload) => {
     const secretKey = process.env.JWT_SECRET;
@@ -50,7 +50,7 @@ export const extractToken = (req) => {
 }
 
 export const checkUserJWT = (req, res, next) => {
-    if (white_lists.includes(req.path)) return next();
+    // if (white_lists.includes(req.path)) return next();
     // let cookies = req.cookies;
     let tokenFormHeader = extractToken(req)
     //if (cookies && cookies.jwt) {
@@ -72,7 +72,7 @@ export const checkUserJWT = (req, res, next) => {
         return res.status(401).json({
             EC: -1,
             data: '',
-            message: "Chưa xác thực người dùng!"
+            message: "Chưa xác thực người dùng      !"
         })
     }
 }
@@ -80,7 +80,11 @@ export const checkUserJWT = (req, res, next) => {
 
 
 export const checkUserPermission = (req, res, next) => {
-    if (white_lists.includes(req.path) || req.path === '/account') return next()
+    console.log("Requested Path:", req.path);
+    // Nếu route có trong white_lists hoặc là '/account', không cần kiểm tra phân quyền
+    // if (white_lists.includes(req.path) || req.path === '/account') {
+    //     return next();
+    // }
     if (req.user) {
         let role = req.user.role
         if (role === 'admin') {

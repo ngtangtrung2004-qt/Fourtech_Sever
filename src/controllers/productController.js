@@ -180,6 +180,7 @@ const ProductController = {
     postView: async (req, res) => {
         try {
             const productId = req.params.id;
+
             const data = await ProductService.postView(productId)
 
             const statusCode = data.statusCode
@@ -189,10 +190,6 @@ const ProductController = {
             })
         } catch (error) {
             console.log('CÓ LỖI TRONG SERVER >>>', error);
-
-            const imageProduct = req.files ? req.files.map(file => file.filename) : null;
-            deleteImage(__dirname, '../uploads/product/', imageProduct)
-
             return res.status(500).json({
                 message: "Lỗi ở Server!",
                 EC: -1
