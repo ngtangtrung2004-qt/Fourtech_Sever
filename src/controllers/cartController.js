@@ -26,7 +26,30 @@ const CartController = {
         try {
             const { user_id, product_id, quantity } = req.body
 
+            console.log(user_id);
+
             const data = await CartService.postCart({ user_id, product_id, quantity })
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
+    deleteCartItem: async (req, res) => {
+        try {
+            const {cartId, productId} = req.params
+
+            const data = await CartService.deleteCartItem({cartId, productId})
 
             const statusCode = data.statusCode
             return res.status(statusCode).json({

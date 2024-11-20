@@ -13,7 +13,6 @@ const getCart = async (dataCart) => {
                     include: {
                         model: db.product, // Tham chiếu đúng đến model sản phẩm
                         as: 'productData',
-                        // attributes: ['id', 'name', 'prire', 'image']
                     }
                 }
             ],
@@ -88,9 +87,8 @@ const postCart = async (dataCart) => {
         })
 
         if (cartItem) {
-            // Nếu người dùng bấm nút cộng (quantity là 1), tăng số lượng lên 1
-            // Nếu người dùng nhập số lượng (quantity có thể là số khác), gán số lượng vào
-            cartItem.quantity += quantity;
+            // Cập nhật số lượng nếu sản phẩm đã tồn tại trong giỏ hàng
+            cartItem.quantity = quantity;
             await db.cart_item.update(
                 { quantity: cartItem.quantity },
                 { where: { id: cartItem.id } }
@@ -102,17 +100,17 @@ const postCart = async (dataCart) => {
                 statusCode: 200
             };
         } else {
-            // Nếu sản phẩm chưa có trong giỏ hàng, tạo mới một mục trong giỏ hàng
-            await db.cart_item.create({
+            // Thêm mới sản phẩm vào giỏ hàng nếu chưa có
+            const newCartItem = await db.cart_item.create({
                 cart_id: cart.id,
-                product_id: product_id,
-                quantity: quantity
+                product_id,
+                quantity,
             });
 
             return {
                 message: "Thêm vào giỏ hàng thành công!",
                 EC: 0,
-                data: '',
+                data: newCartItem,
                 statusCode: 200
             };
         }
@@ -127,7 +125,49 @@ const postCart = async (dataCart) => {
     }
 }
 
+const deleteCartItem = async (data) => {
+    try {
+        const cartId = data.cartId
+        const productId = data.productId
+
+        console.log(cartId, productId);
+
+        const result = await db.cart_item.destroy({
+            where: {
+                cart_id: cartId,
+                product_id: productId,
+            },
+            force: true
+        });
+
+        if (result) {
+            return {
+                message: 'Xóa sản phẩm trong giỏ hàng thành công.',
+                EC: 0,
+                data: result,
+                statusCode: 200
+            }
+        } else {
+            return {
+                message: 'Không tìm thấy sản phẩm trong giỏ hàng.',
+                EC: 1,
+                data: '',
+                statusCode: 404
+            }
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+}
+
 module.exports = {
     getCart,
-    postCart
+    postCart,
+    deleteCartItem
 }
