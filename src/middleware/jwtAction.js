@@ -18,6 +18,7 @@ const white_lists = [
     '/product',
     'product/:id',
     'product/:id/increase-view',
+    '/search'
 ]
 
 export const createJWT = (payload) => {

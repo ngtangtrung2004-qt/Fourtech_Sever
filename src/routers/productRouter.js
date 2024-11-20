@@ -15,6 +15,6 @@ router.delete('/product/delete-soft/:id', checkUserJWT, checkUserPermission, Pro
 router.put('/product/restore/:id', checkUserJWT, checkUserPermission, ProductController.restoreProduct);
 router.delete('/product/delete/:id', checkUserJWT, checkUserPermission, ProductController.deleteProduct);
 
-// router.get('/search',ProductController.searchProduct)
+router.get('/search',ProductController.searchProduct)
 
 module.exports = router;
