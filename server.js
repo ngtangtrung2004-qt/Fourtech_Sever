@@ -10,6 +10,7 @@ import productRouter from './src/routers/productRouter'
 import contactRouter from './src/routers/contactRouter'
 import brandRouter from './src/routers/brandRouter'
 import imageRouter from './src/routers/imageRouter'
+import passwordController from './src/routers/passwordController'
 import cartRouter from './src/routers/cartRouter'
 
 import cookieParser from 'cookie-parser';
@@ -50,6 +51,8 @@ app.use('/api/', cartRouter);
 
 //
 app.use('/api', contactRouter);
+//
+app.use('/api', passwordController);
 
 app.use((req, res) => {
   return res.send('404 Not Found')

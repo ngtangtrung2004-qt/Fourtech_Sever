@@ -1,5 +1,8 @@
+import { error } from 'console';
 import { deleteImage } from '../middleware/multer'
 import * as ProductService from '../services/product'
+import db from '../models';
+import { Op, where } from 'sequelize';
 
 const ProductController = {
     getAllProduct: async (req, res) => {
@@ -196,6 +199,27 @@ const ProductController = {
             })
         }
     },
+    // searchProduct: async (req,res)=>{
+    //     const {query}=req.query;// lấy từ kháo tìm kiếm
+    //     console.log('tai nghe',req)
+    //     if(!query){
+    //         return res.status(400).json({error:'tìm kiếm không được để trống'});
+    //     }
+    //     try{
+    //         const results = await db.product.findAll({
+    //             where:{
+    //                 [Op.or]:[
+    //                     {name:{[Op.like]: `%${query}%`}}
+    //                 ]
+    //             }
+    //         });
+    //         res.json(results)
+    //     }catch(error){
+    //         console.error('Lỗi tìm kiếm:', error);
+    // res.status(500).json({ error: 'Lỗi khi tìm kiếm' });
+    //     }
+
+    // }
 }
 
 module.exports = ProductController

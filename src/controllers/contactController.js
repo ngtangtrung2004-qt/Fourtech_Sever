@@ -1,4 +1,5 @@
 // controllers/feedbackController.js
+const db = require('../models');
 const { Contact } = require('../models');
 
 // API để tạo phản hồi mới
@@ -27,3 +28,32 @@ exports.getContacts = async (req, res) => {
         res.status(500).json({ message: 'Không thể lấy phản hồi', error });
     }
 };
+
+exports.deleteContact = async (req,res) =>{
+    const { id } = req.params;
+
+  try {
+    const contact = await db.contact.findByPk(id); // Tìm liên hệ theo ID
+    if (!contact) {
+      return res.status(404).json({
+        message: "Không tìm thấy liên hệ!",
+        EC: 1,
+        data: null,
+      });
+    }
+
+    await contact.destroy(); // Xóa liên hệ
+    return res.status(200).json({
+      message: "Xóa liên hệ thành công!",
+      EC: 0,
+      data: null,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xóa liên hệ:", error);
+    return res.status(500).json({
+      message: "Có lỗi xảy ra, vui lòng thử lại sau.",
+      EC: -1,
+      data: null,
+    });
+  }
+}
