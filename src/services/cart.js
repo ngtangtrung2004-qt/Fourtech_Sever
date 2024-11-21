@@ -88,7 +88,7 @@ const postCart = async (dataCart) => {
 
         if (cartItem) {
             // Cập nhật số lượng nếu sản phẩm đã tồn tại trong giỏ hàng
-            cartItem.quantity = quantity;
+            cartItem.quantity += quantity; // Cộng thêm số lượng mới
             await db.cart_item.update(
                 { quantity: cartItem.quantity },
                 { where: { id: cartItem.id } }
@@ -96,7 +96,7 @@ const postCart = async (dataCart) => {
             return {
                 message: "Cập nhật số lượng sản phẩm thành công!",
                 EC: 0,
-                data: '',
+                data: cartItem,
                 statusCode: 200
             };
         } else {
@@ -127,44 +127,48 @@ const postCart = async (dataCart) => {
 
 const deleteCartItem = async (data) => {
     try {
-        const cartId = data.cartId
-        const productId = data.productId
-
-        console.log(cartId, productId);
+        const cartId = data.cartId;
+        const productId = data.productId;
 
         const result = await db.cart_item.destroy({
             where: {
                 cart_id: cartId,
                 product_id: productId,
             },
-            force: true
+            force: true, // Xóa vĩnh viễn
         });
 
         if (result) {
+            // Lấy lại giỏ hàng sau khi xóa
+            const updatedCart = await db.cart_item.findAll({
+                where: { cart_id: cartId },
+                include: [{ model: db.product, as: 'productData' }],
+            });
+
             return {
                 message: 'Xóa sản phẩm trong giỏ hàng thành công.',
                 EC: 0,
-                data: result,
-                statusCode: 200
-            }
+                data: updatedCart, // Trả về danh sách giỏ hàng còn lại
+                statusCode: 200,
+            };
         } else {
             return {
                 message: 'Không tìm thấy sản phẩm trong giỏ hàng.',
                 EC: 1,
-                data: '',
-                statusCode: 404
-            }
+                data: null,
+                statusCode: 404,
+            };
         }
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
         return {
-            message: "Có lỗi trong Service!",
+            message: 'Có lỗi trong Service!',
             EC: -1,
-            data: '',
-            statusCode: 500
+            data: null,
+            statusCode: 500,
         };
     }
-}
+};
 
 module.exports = {
     getCart,

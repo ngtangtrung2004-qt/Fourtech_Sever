@@ -183,6 +183,46 @@ const getOneProduct = async (idProduct) => {
     }
 }
 
+const getProductByCategory = async (idCategory) => {
+    try {
+        const product = await db.product.findAll({
+            where: { category_id: idCategory },
+            include:
+            {
+                model: db.category,
+                as: 'categoryData',
+                attributes: ['id', 'name']
+            }
+        })
+
+        if (product.length === 0) {
+            return {
+                message: "Không tìm thấy sản phẩm nào cho danh mục này!",
+                statusCode: 200,
+                data: [],
+                EC: 1
+            }
+        } else {
+            return {
+                message: "Lấy sản phẩm theo danh mục này thành công.",
+                statusCode: 200,
+                data: product,
+                EC: 1
+            }
+        }
+
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+
+        return {
+            message: "Có lỗi trong Service!",
+            data: '',
+            EC: -1,
+            statusCode: 500
+        }
+    }
+}
+
 const postProduct = async (dataProduct) => {
     try {
         const { nameProduct, category_id, brand_id, price, promotion_price, description, quantity, imageProduct } = dataProduct
@@ -485,6 +525,8 @@ const deleteProduct = async (id) => {
     }
 };
 
+
+
 const postView = async (id) => {
     try {
         const product = await db.product.findOne({
@@ -521,6 +563,7 @@ module.exports = {
     getAllProduct,
     getAllProductTrash,
     getOneProduct,
+    getProductByCategory,
     postProduct,
     putProduct,
     deleteSoftProduct,

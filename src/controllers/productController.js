@@ -69,6 +69,28 @@ const ProductController = {
         }
     },
 
+    getProductByCategory: async (req, res) => {
+        try {
+            const categoryId = req.params.categoryId
+
+            const data = await ProductService.getProductByCategory(categoryId)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
     postProduct: async (req, res) => {
         try {
             const imageProduct = req.files ? req.files.map(file => file.filename) : [];
