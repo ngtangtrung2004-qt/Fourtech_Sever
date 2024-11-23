@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/product', ProductController.getAllProduct);
 router.get('/product-trash', checkUserJWT, checkUserPermission, ProductController.getAllProductTrash);
 router.get('/product/:id', ProductController.getOneProduct);
+router.get('/category/:categoryId/products', ProductController.getProductByCategory);
 router.post('/product/create', checkUserJWT, checkUserPermission, upload('product').array('imageProduct', 5), ProductController.postProduct, multerErrorHandler);
 router.post('/product/increase-view/:id', ProductController.postView);
 router.put('/product/update/:id', checkUserJWT, checkUserPermission, upload('product').array('image', 5), ProductController.putProduct, multerErrorHandler);

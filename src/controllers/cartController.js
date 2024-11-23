@@ -26,7 +26,8 @@ const CartController = {
         try {
             const { user_id, product_id, quantity } = req.body
 
-            console.log(user_id);
+            console.log('user_id', user_id);
+            console.log('product_id', product_id);
 
             const data = await CartService.postCart({ user_id, product_id, quantity })
 
@@ -47,9 +48,9 @@ const CartController = {
 
     deleteCartItem: async (req, res) => {
         try {
-            const {cartId, productId} = req.params
+            const { cartId, productId } = req.params
 
-            const data = await CartService.deleteCartItem({cartId, productId})
+            const data = await CartService.deleteCartItem({ cartId, productId })
 
             const statusCode = data.statusCode
             return res.status(statusCode).json({
