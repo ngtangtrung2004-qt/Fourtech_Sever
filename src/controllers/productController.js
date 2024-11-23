@@ -201,7 +201,6 @@ const ProductController = {
     },
     searchProduct: async (req,res)=>{
         const {query}=req.query;// lấy từ kháo tìm kiếm
-        console.log('tai nghe',req)
         if(!query){
             return res.status(400).json({error:'tìm kiếm không được để trống'});
         }
