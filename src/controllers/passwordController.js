@@ -57,13 +57,13 @@ resetPassword:async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn.' });
+      return res.status(400).json({ message: 'Đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.resetToken = null;
-    user.resetTokenExpiration = null;
+    user.reset_token = null;
+    user.reset_token_expiration = null;
     await user.save();
 
     res.json({ message: 'Mật khẩu đã được đặt lại thành công.' });
