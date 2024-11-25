@@ -91,7 +91,7 @@ const postCategory = async (categoryData) => {
         if (categoryImage) {
             deleteImage(__dirname, '../uploads/category/', categoryImage);
         }
- 
+
         return {
             message: "Có lỗi trong Service!",
             EC: -1,
@@ -118,17 +118,6 @@ const putCategory = async (categoryEditData) => {
                 statusCode: 400
             }
         }
-
-        if (!categoryImage) {
-            deleteImage(__dirname, '../uploads/category/', categoryImage)
-            return {
-                EC: 1,
-                message: "Phải có hình ảnh!",
-                data: '',
-                statusCode: 400
-            }
-        }
-
 
         if (idCategory) {
             // Kiểm tra xem tên danh mục đã tồn tại trong cơ sở dữ liệu chưa
@@ -157,7 +146,9 @@ const putCategory = async (categoryEditData) => {
                 }
             );
 
-            deleteImage(__dirname, '../uploads/', idCategory.image)
+            if (categoryImage && categoryImage !== idCategory.image) {
+                deleteImage(__dirname, '../uploads/', idCategory.image)
+            }
 
             return {
                 message: 'Cập nhật danh mục thành công!',
@@ -191,6 +182,20 @@ const putCategory = async (categoryEditData) => {
 
 const deleteCategory = async (id) => {
     try {
+
+        const product = await db.product.findAll({
+            where: { category_id: id }
+        })
+
+        if (product.length > 0) {
+            return {
+                message: "Không thể xóa danh mục này vì liên quan đến sản phẩm!",
+                data: '',
+                EC: -1,
+                statusCode: 409
+            }
+        }
+
         // Tìm danh mục trong cơ sở dữ liệu
         const category = await db.category.findOne({
             where: {
@@ -200,6 +205,7 @@ const deleteCategory = async (id) => {
 
         if (category) {
             // Lấy tên tệp hình ảnh
+
             const categoryImage = category.image;
             deleteImage(__dirname, '../uploads/', categoryImage)
 
@@ -218,7 +224,10 @@ const deleteCategory = async (id) => {
             }
 
             // Xóa danh mục khỏi cơ sở dữ liệu
-            await category.destroy();
+            await category.destroy({
+                where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
+                force: true
+            });
 
             return {
                 message: "Xóa danh mục thành công.",

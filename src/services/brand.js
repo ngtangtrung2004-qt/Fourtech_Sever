@@ -117,16 +117,6 @@ const putBrand = async (brandEditData) => {
             }
         }
 
-        if (!brandImage) {
-            deleteImage(__dirname, '../uploads/brand/', brandImage)
-            return {
-                message: "Chưa chọn hình ảnh!",
-                EC: 1,
-                data: '',
-                statusCode: 400
-            }
-        }
-
         // Tìm thương hiệu theo ID
         let idBrand = await db.brand.findOne({
             where: { id: id }
@@ -162,8 +152,11 @@ const putBrand = async (brandEditData) => {
                 }
             );
 
-            //Xóa ảnh cũ trong thư mục uploads khi update ảnh mới
-            deleteImage(__dirname, '../uploads/', idBrand.logo)
+            // Xóa ảnh cũ trong thư mục uploads khi update ảnh mới
+            if (brandImage && brandImage !== idBrand.logo) {
+                console.log('xóa');
+                deleteImage(__dirname, '../uploads/', idBrand.logo);
+            }
 
             return {
                 message: 'Cập nhật thương hiệu thành công!',
@@ -197,6 +190,19 @@ const putBrand = async (brandEditData) => {
 
 const deleteBrand = async (id) => {
     try {
+        const product = await db.product.findAll({
+            where: { brand_id: id }
+        })
+
+        if (product.length > 0) {
+            return {
+                message: "Không thể xóa thương hiệu này vì đã có sản phẩm liên quan!",
+                data: '',
+                EC: -1,
+                statusCode: 409
+            }
+        }
+
         // Tìm thương hiệu trong cơ sở dữ liệu
         const brand = await db.brand.findOne({
             where: {
@@ -207,19 +213,27 @@ const deleteBrand = async (id) => {
         if (brand) {
             // Lấy tên tệp hình ảnh
             const brandImage = brand.logo;
+            deleteImage(__dirname, '../uploads/', brandImage)
 
             if (brandImage) {
-                console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:");
-                return {
-                    message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
-                    data: '',
-                    EC: -1,
-                    statusCode: 404
+                try {
+                    console.log("Tệp hình ảnh đã được xóa.");
+                } catch (error) {
+                    console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:");
+                    return {
+                        message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
+                        data: '',
+                        EC: -1,
+                        statusCode: 404
+                    }
                 }
             }
 
             // Xóa thương hiệu khỏi cơ sở dữ liệu
-            await brand.destroy();
+            await brand.destroy({
+                where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
+                force: true
+            });
 
             return {
                 message: "Xóa thương hiệu thành công.",

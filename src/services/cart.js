@@ -27,6 +27,20 @@ const getCart = async (dataCart) => {
             }
         }
 
+        // Lọc các mục giỏ hàng có sản phẩm không hợp lệ
+        const invalidCartItems = Array.isArray(cart.cart_itemData)
+            ? cart.cart_itemData.filter(item => item.productData === null)
+            : []; // Nếu không phải mảng, trả về mảng rỗng
+
+        // Xóa các mục giỏ hàng không hợp lệ
+        for (const item of invalidCartItems) {
+            await db.cart_item.destroy({
+                where: { id: item.id },
+                force: true
+            })
+        }
+
+        // Lấy lại các mục giỏ hàng hợp lệ
         const validCartItems = Array.isArray(cart.cart_itemData)
             ? cart.cart_itemData.filter(item => item.productData !== null)
             : []; // Nếu không phải mảng, trả về mảng rỗng

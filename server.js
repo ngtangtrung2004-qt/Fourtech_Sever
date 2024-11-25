@@ -14,6 +14,7 @@ import passwordController from './src/routers/passwordController'
 import cartRouter from './src/routers/cartRouter'
 import paymentMethodRouter from './src/routers/paymentMethodRouter'
 import commentRouter from './src/routers/commentRouter'
+import orderRouter from './src/routers/orderRouter'
 
 import cookieParser from 'cookie-parser';
 import path from 'path'
@@ -51,6 +52,7 @@ app.use('/api/', brandRouter);
 app.use('/api/', imageRouter);
 app.use('/api/', cartRouter);
 app.use('/api/', paymentMethodRouter);
+app.use('/api/', orderRouter);
 
 //
 app.use('/api', contactRouter);
