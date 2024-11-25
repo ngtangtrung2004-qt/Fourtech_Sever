@@ -1,31 +1,77 @@
 const db = require("../models");
 
 const CommentController = {
-  getComment: async (req, res) => {
-    const { product_id } = req.params; // Lấy trực tiếp từ params
-    console.log("id", product_id); // Kiểm tra giá trị product_id trong console
-
+  getAllComment: async (req, res) => {
     try {
       const comments = await db.review.findAll({
-        where: { product_id },
+        where: { parent_comment_id: null },
         include: [
           {
-            model: db.user, // Kết nối bảng `user`
-            as: "userData", // Alias (nên khớp với định nghĩa trong model)
-            attributes: ["id", "full_name"], // Chỉ lấy các cột cần thiết
+            model: db.user,
+            as: "userData",
+            attributes: ["id", "full_name", "role"],
+          },
+          {
+            model: db.product,
+            as: "productData",
+            attributes: ["id", "name"],
           },
         ],
+        order: [["updatedAt", "DESC"]],
+      });
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ message: "Không thể lấy Bình luận", error });
+    }
+  },
+  getComment: async (req, res) => {
+    const { product_id } = req.params; // Lấy product_id từ params
+    const { page = 1, limit = 5 } = req.query; // Lấy page và limit từ query params
+    const offset = (page - 1) * limit; // Tính offset cho phân trang
+
+    try {
+      // Lấy danh sách bình luận cha
+      const { count, rows } = await db.review.findAndCountAll({
+        where: { product_id, parent_comment_id: null }, // Bình luận gốc
+        include: [
+          {
+            model: db.user, // Kết nối với bảng user
+            as: "userData", // Alias cho mối quan hệ
+            attributes: ["id", "full_name", "role"], // Lấy các cột cần thiết
+          },
+          {
+            model: db.review, // Bao gồm phản hồi (bình luận con)
+            as: "replies",
+            include: [
+              {
+                model: db.user, // Kết nối user cho phản hồi
+                as: "userData",
+                attributes: ["id", "full_name", "role"],
+              },
+            ],
+          },
+        ],
+        limit: parseInt(limit), // Số lượng bình luận mỗi trang
+        offset: parseInt(offset), // Vị trí bắt đầu
+        order: [["updatedAt", "DESC"]], // Sắp xếp theo thời gian cập nhật
       });
 
-      res.status(200).json(comments); // Trả về danh sách bình luận
+      // Trả về kết quả
+      res.status(200).json({
+        total: count, // Tổng số bình luận gốc
+        page: parseInt(page), // Trang hiện tại
+        limit: parseInt(limit), // Số lượng bình luận mỗi trang
+        totalPages: Math.ceil(count / limit), // Tổng số trang
+        comments: rows, // Danh sách bình luận
+      });
     } catch (error) {
-      console.error("Lỗi khi lấy bình luận:", error); // Log lỗi để dễ debug
+      console.error("Lỗi khi lấy bình luận:", error); // Log lỗi để debug
       res.status(500).json({ message: "Lỗi khi lấy bình luận", error });
     }
   },
   postComment: async (req, res) => {
     const { product_id } = req.params; // Lấy product_id từ URL
-    const { content, rating } = req.body; // Lấy dữ liệu từ client
+    const { content, rating, parent_comment_id } = req.body; // Lấy dữ liệu từ client
     const user_id = req.user?.id; // Lấy user_id từ token
     if (!user_id) {
       return res.status(401).json({
@@ -38,10 +84,11 @@ const CommentController = {
         content,
         rating,
         product_id,
-        user_id:user_id,
+        user_id: user_id,
+        parent_comment_id: parent_comment_id || null, // Nếu không có, mặc định là null
       });
       const user = await db.user.findByPk(user_id, {
-        attributes: ["id", "full_name"], // Chỉ lấy các thông tin cần thiết
+        attributes: ["id", "full_name", "role"], // Chỉ lấy các thông tin cần thiết
       });
 
       if (!user) {
@@ -58,10 +105,13 @@ const CommentController = {
         product_id: newComment.product_id,
         user_id: newComment.user_id,
         updatedAt: newComment.updatedAt,
+        parent_comment_id: newComment.parent_comment_id,
         userData: {
           id: user.id,
-          full_name: user.full_name
+          full_name: user.role === "admin" ? "Admin" : user.full_name,
+          role: user.role,
         },
+        replies: [],
       };
 
       // Trả về phản hồi
@@ -71,6 +121,39 @@ const CommentController = {
       });
     } catch (error) {
       res.status(500).json({ message: "Lỗi khi thêm bình luận", error });
+    }
+  },
+  deleteComment: async (req, res) => {
+    const { id } = req.params;
+    console.log(id);
+
+    try {
+      const comment = await await db.review.findOne({
+        where: {
+          id: id,
+        },
+      }); // Tìm liên hệ theo ID
+      if (!comment) {
+        return res.status(404).json({
+          message: "Không tìm thấy bình luận!",
+          EC: 1,
+          data: null,
+        });
+      }
+
+      await comment.destroy(); // Xóa liên hệ
+      return res.status(200).json({
+        message: "Xóa Bình luận thành công!",
+        EC: 0,
+        data: null,
+      });
+    } catch (error) {
+      console.error("Lỗi khi xóa Bình luận:", error);
+      return res.status(500).json({
+        message: "Có lỗi xảy ra, vui lòng thử lại sau.",
+        EC: -1,
+        data: null,
+      });
     }
   },
 };

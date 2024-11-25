@@ -1,37 +1,47 @@
-'use strict';
-const {
-    Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-    class review extends Model {
-        /**
-         * Helper method for defining associations.
-         * This method is not a part of Sequelize lifecycle.
-         * The `models/index` file will call this method automatically.
-         */
-        static associate(models) {
-            review.belongsTo(models.product, {
-                foreignKey: 'product_id',
-                as: 'productData'
-            })
-            review.belongsTo(models.user, {
-                foreignKey: 'user_id',
-                as: 'userData'
-            })
-        }
+  class review extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      review.belongsTo(models.product, {
+        foreignKey: "product_id",
+        as: "productData",
+      });
+      review.belongsTo(models.user, {
+        foreignKey: "user_id",
+        as: "userData",
+      });
+      review.hasMany(models.review, {
+        foreignKey: "parent_comment_id",
+        as: "replies",
+      });
+      review.belongsTo(models.review, {
+        foreignKey: "parent_comment_id",
+        as: "parentComment",
+      });
     }
-    review.init({
-        product_id: DataTypes.INTEGER,
-        user_id: DataTypes.INTEGER,
-        rating: DataTypes.INTEGER,
-        content: DataTypes.STRING,
-    }, {
-        sequelize,
-        modelName: 'review',
-        tableName: 'review',
-        timestamps: true,
-        underscored: true,
-        paranoid: true
-    });
-    return review;
+  }
+  review.init(
+    {
+      product_id: DataTypes.INTEGER,
+      user_id: DataTypes.INTEGER,
+      rating: DataTypes.INTEGER,
+      content: DataTypes.STRING,
+      parent_comment_id: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "review",
+      tableName: "review",
+      timestamps: true,
+      underscored: true,
+      paranoid: true,
+    }
+  );
+  return review;
 };
