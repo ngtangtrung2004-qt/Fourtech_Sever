@@ -75,7 +75,7 @@ export const checkUserJWT = (req, res, next) => {
         return res.status(401).json({
             EC: -1,
             data: '',
-            message: "Chưa xác thực người dùng      !"
+            message: "Chưa xác thực người dùng!"
         })
     }
 }

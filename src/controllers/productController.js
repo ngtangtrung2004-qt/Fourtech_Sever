@@ -221,24 +221,24 @@ const ProductController = {
             })
         }
     },
-    searchProduct: async (req,res)=>{
-        const {query}=req.query;// lấy từ kháo tìm kiếm
-        console.log('tai nghe',req)
-        if(!query){
-            return res.status(400).json({error:'tìm kiếm không được để trống'});
+    searchProduct: async (req, res) => {
+        const { query } = req.query;// lấy từ kháo tìm kiếm
+        console.log('tai nghe', req)
+        if (!query) {
+            return res.status(400).json({ error: 'tìm kiếm không được để trống' });
         }
-        try{
+        try {
             const results = await db.product.findAll({
-                where:{
-                    [Op.or]:[
-                        {name:{[Op.like]: `%${query}%`}} // Tìm kiếm theo tên
+                where: {
+                    [Op.or]: [
+                        { name: { [Op.like]: `%${query}%` } } // Tìm kiếm theo tên
                     ]
                 }
             });
             res.json(results)
-        }catch(error){
+        } catch (error) {
             console.error('Lỗi tìm kiếm:', error);
-    res.status(500).json({ error: 'Lỗi khi tìm kiếm' });
+            res.status(500).json({ error: 'Lỗi khi tìm kiếm' });
         }
 
     }

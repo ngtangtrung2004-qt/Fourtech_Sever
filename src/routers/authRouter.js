@@ -10,6 +10,7 @@ router.post('/login', AuthControler.handleLogin);
 router.post('/logout', AuthControler.handleLogout);
 router.get('/account', checkUserJWT, AuthControler.getAccount);
 router.get('/all-user', checkUserJWT, checkUserPermission, AuthControler.getAllUser);
+router.get('/user/:id', checkUserJWT, AuthControler.getOneUser);
 router.delete('/delete-user/:id', checkUserJWT, checkUserPermission, AuthControler.deleteUser);
 
 
