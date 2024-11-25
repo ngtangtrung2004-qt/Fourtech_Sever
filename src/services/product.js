@@ -207,7 +207,7 @@ const getProductByCategory = async (idCategory) => {
                 message: "Lấy sản phẩm theo danh mục này thành công.",
                 statusCode: 200,
                 data: product,
-                EC: 1
+                EC: 0
             }
         }
 
@@ -218,7 +218,9 @@ const getProductByCategory = async (idCategory) => {
             message: "Có lỗi trong Service!",
             data: '',
             EC: -1,
+            data: '',
             statusCode: 500
+            
         }
     }
 }
