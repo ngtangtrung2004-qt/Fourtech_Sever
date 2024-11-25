@@ -12,6 +12,7 @@ import brandRouter from './src/routers/brandRouter'
 import imageRouter from './src/routers/imageRouter'
 import passwordController from './src/routers/passwordController'
 import cartRouter from './src/routers/cartRouter'
+import paymentMethodRouter from './src/routers/paymentMethodRouter'
 import commentRouter from './src/routers/commentRouter'
 
 import cookieParser from 'cookie-parser';
@@ -49,13 +50,14 @@ app.use('/api/', productRouter);
 app.use('/api/', brandRouter);
 app.use('/api/', imageRouter);
 app.use('/api/', cartRouter);
+app.use('/api/', paymentMethodRouter);
 
 //
 app.use('/api', contactRouter);
 //
 app.use('/api', passwordController);
 //
-app.use('/api',commentRouter)
+app.use('/api', commentRouter)
 app.use((req, res) => {
   return res.send('404 Not Found')
 })

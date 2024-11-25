@@ -132,6 +132,26 @@ const AuthControler = {
         }
     },
 
+    getOneUser: async (req, res) => {
+        try {
+            const idUser = req.params.id
+            const data = await authServices.getOneUser(idUser)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
     deleteUser: async (req, res) => {
         try {
             const userId = req.params.id

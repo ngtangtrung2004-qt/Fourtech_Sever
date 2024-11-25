@@ -39,6 +39,9 @@ module.exports = {
             payment_methor: {
                 type: Sequelize.STRING,
             },
+            payment_status: {
+                type: Sequelize.INTEGER,
+            },
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,

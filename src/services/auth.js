@@ -161,6 +161,39 @@ const getAllUser = async () => {
     }
 }
 
+const getOneUser = async (idUser) => {
+    try {
+        const data = await db.user.findOne({
+            where: { id: idUser },
+            attributes: ['id', 'full_name', 'email', 'phone', 'gender', 'address', 'avatar'],
+        })
+
+        if(!data) {
+            return {
+                message: "Người dùng không tồn tại",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            }
+        }
+
+        return {
+            message: "Lấy thông tin người dùng thành công.",
+            EC: 0,
+            data: data,
+            statusCode: 200
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        }
+    }
+}
+
 const deleteService = async (id) => {
     try {
         const user = await db.user.findOne({
@@ -199,5 +232,6 @@ module.exports = {
     registerService,
     loginService,
     getAllUser,
+    getOneUser,
     deleteService
 }
