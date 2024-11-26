@@ -30,7 +30,7 @@ const PaymentMethodController = {
             //         //-Máy Mac thì vào link: https://dashboard.ngrok.com/get-started/setup/macos
             //         //B2: Đăng ký tài khoản xong chạy lệnh theo hướng dẫn
             //         //(Video hướng dẫn 'https://www.youtube.com/watch?v=Cxi3cHpV238')
-            var ipnUrl = `https://35b0-1-55-9-141.ngrok-free.app/api/callback_payment`;
+            var ipnUrl = `${process.env.ipnUrl}/api/callback_payment`;
 
             var requestType = "captureWallet"; //dùng phương thức quét mã
             var extraData = '';
