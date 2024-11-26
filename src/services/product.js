@@ -220,7 +220,49 @@ const getProductByCategory = async (idCategory) => {
             EC: -1,
             data: '',
             statusCode: 500
-            
+
+        }
+    }
+}
+
+const getProductByBrand = async (idBrand) => {
+    try {
+        const product = await db.product.findAll({
+            where: { brand_id: idBrand },
+            include:
+            {
+                model: db.brand,
+                as: 'brandData',
+                attributes: ['id', 'name']
+            }
+        })
+
+        if (product.length === 0) {
+            return {
+                message: "Không tìm thấy sản phẩm nào cho thương hiệu này!",
+                statusCode: 200,
+                data: [],
+                EC: 1
+            }
+        } else {
+            return {
+                message: "Lấy sản phẩm theo thương hiệu này thành công.",
+                statusCode: 200,
+                data: product,
+                EC: 0
+            }
+        }
+
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+
+        return {
+            message: "Có lỗi trong Service!",
+            data: '',
+            EC: -1,
+            data: '',
+            statusCode: 500
+
         }
     }
 }
@@ -300,23 +342,17 @@ const putProduct = async (dataProduct) => {
                 statusCode: 400
             }
         }
-        if (imageProduct.length === 0) {
-            deleteImage(__dirname, '../uploads/product/', imageProduct)
-            return {
-                message: 'Không có tệp hình ảnh nào được tải lên!',
-                statusCode: 400,
-                data: '',
-                EC: 1
-            };
-        }
 
         const id = await db.product.findOne({
             where: { id: idProduct }
         })
 
-        const imagesWithPrefix = Array.isArray(imageProduct)
-            ? imageProduct.map(image => `product/${image}`)
-            : [`product/${imageProduct}`]; // Thêm tiền tố cho ảnh nếu chỉ có 1 ảnh
+        // Nếu không có ảnh mới, giữ lại ảnh cũ
+        const imagesWithPrefix = imageProduct && imageProduct.length > 0
+            ? Array.isArray(imageProduct)
+                ? imageProduct.map(image => `product/${image}`)
+                : [`product/${imageProduct}`] // Thêm tiền tố cho ảnh nếu chỉ có 1 ảnh
+            : undefined; // Nếu không có ảnh mới, không cần cập nhật ảnh
 
         if (id) {
             const data = await db.product.update(
@@ -324,7 +360,7 @@ const putProduct = async (dataProduct) => {
                     name,
                     category_id,
                     brand_id,
-                    image: imagesWithPrefix,
+                    image: imagesWithPrefix || id.image,
                     price,
                     promotion_price,
                     description,
@@ -332,9 +368,13 @@ const putProduct = async (dataProduct) => {
                 },
                 {
                     where: { id: idProduct }
-                })
-            deleteImage(__dirname, '../uploads/', id.image)
+                }
+            )
+
             if (data) {
+                if (imagesWithPrefix) {
+                    deleteImage(__dirname, '../uploads/', id.image); // Xóa ảnh cũ nếu có ảnh mới
+                }
                 return {
                     EC: 0,
                     message: "Cập nhật sản phẩm thành công.",
@@ -342,7 +382,6 @@ const putProduct = async (dataProduct) => {
                     data: data
                 }
             } else {
-                deleteImage(__dirname, '../uploads/product/', imageProduct)
                 return {
                     EC: 1,
                     message: "Lỗi hệ thống!",
@@ -376,6 +415,20 @@ const putProduct = async (dataProduct) => {
 
 const deleteSoftProduct = async (id) => {
     try {
+
+        const orderDetail = await db.order_detail.findAll({
+            where: { product_id: id }
+        })
+
+        if (orderDetail.length > 0) {
+            return {
+                message: "Không được xóa sản phẩm này vì có liên quan đến đơn hàng!",
+                EC: 1,
+                data: '',
+                statusCode: 409
+            };
+        }
+
         // Tìm sản phẩm trong cơ sở dữ liệu
         const product = await db.product.findOne({
             where: {
@@ -464,50 +517,34 @@ const deleteProduct = async (id) => {
         });
 
         if (product) {
-            // Xóa tất cả cart_item liên quan đến sản phẩm
-            const cartItems = await db.cart_item.findAll({
-                where: { product_id: id } // Sửa lại để so sánh với product_id của sản phẩm
+            // Nếu không có mục cart_item tham chiếu, có thể xóa sản phẩm
+            await db.product.destroy({
+                where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
+                force: true
             });
+            const productImage = product.image;
 
-            if (cartItems.length > 0) {
-                // Nếu có mục cart_item tham chiếu đến sản phẩm, không xóa sản phẩm
-                console.log("Sản phẩm này không thể xóa vì vẫn có trong giỏ hàng.");
-                return {
-                    message: "Sản phẩm này không thể xóa vì vẫn có trong giỏ hàng!",
-                    data: '',
-                    EC: 1,
-                    statusCode: 400
-                };
-            } else {
-                // Nếu không có mục cart_item tham chiếu, có thể xóa sản phẩm
-                await db.product.destroy({
-                    where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
-                    force: true
-                });
-                const productImage = product.image;
-
-                if (productImage) {
-                    try {
-                        deleteImage(__dirname, '../uploads/', productImage)
-                        console.log("Tệp hình ảnh đã được xóa.");
-                    } catch (err) {
-                        console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
-                        return {
-                            message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
-                            data: '',
-                            EC: -1,
-                            statusCode: 404
-                        }
+            if (productImage) {
+                try {
+                    deleteImage(__dirname, '../uploads/', productImage)
+                    console.log("Tệp hình ảnh đã được xóa.");
+                } catch (err) {
+                    console.log("Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại:", err);
+                    return {
+                        message: "Lỗi khi xóa tệp hình ảnh hoặc tệp không tồn tại!",
+                        data: '',
+                        EC: -1,
+                        statusCode: 404
                     }
                 }
-
-                return {
-                    message: "Xóa sản phẩm vĩnh viễn thành công.",
-                    EC: 0,
-                    data: product,
-                    statusCode: 200
-                };
             }
+
+            return {
+                message: "Xóa sản phẩm vĩnh viễn thành công.",
+                EC: 0,
+                data: product,
+                statusCode: 200
+            };
         } else {
             return {
                 message: "Sản phẩm không tồn tại!",
@@ -566,6 +603,7 @@ module.exports = {
     getAllProductTrash,
     getOneProduct,
     getProductByCategory,
+    getProductByBrand,
     postProduct,
     putProduct,
     deleteSoftProduct,

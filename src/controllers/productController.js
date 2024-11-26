@@ -91,6 +91,28 @@ const ProductController = {
         }
     },
 
+    getProductByBrand: async (req, res) => {
+        try {
+            const brandId = req.params.brandId
+
+            const data = await ProductService.getProductByBrand(brandId)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
     postProduct: async (req, res) => {
         try {
             const imageProduct = req.files ? req.files.map(file => file.filename) : [];
@@ -223,7 +245,7 @@ const ProductController = {
     },
     searchProduct: async (req,res)=>{
         const {query}=req.query;// lấy từ kháo tìm kiếm
-        console.log('tai nghe',req)
+        // console.log('tai nghe',req)
         if(!query){
             return res.status(400).json({error:'tìm kiếm không được để trống'});
         }
