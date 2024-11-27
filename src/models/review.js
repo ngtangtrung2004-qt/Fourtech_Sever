@@ -11,18 +11,22 @@ module.exports = (sequelize, DataTypes) => {
       review.belongsTo(models.product, {
         foreignKey: "product_id",
         as: "productData",
+        onDelete: 'SET NULL'
       });
       review.belongsTo(models.user, {
         foreignKey: "user_id",
         as: "userData",
+        onDelete: 'SET NULL'
       });
       review.hasMany(models.review, {
         foreignKey: "parent_comment_id",
         as: "replies",
+        onDelete: 'CASCADE'
       });
       review.belongsTo(models.review, {
         foreignKey: "parent_comment_id",
         as: "parentComment",
+        onDelete: 'SET NULL'
       });
     }
   }
