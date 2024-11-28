@@ -39,7 +39,6 @@ const getDashboardData = async () => {
             order: [[fn('SUM', col('order_detail.quantity')), 'DESC']],
             limit: 1, // Chỉ lấy sản phẩm bán chạy nhất
         });
-        console.log(bestSellingProducts);
 
         const bestSellingProduct = bestSellingProducts[0]
             ? {

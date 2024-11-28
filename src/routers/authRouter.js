@@ -1,7 +1,7 @@
 import express from 'express'
 import AuthControler from '../controllers/authController';
-// const AuthControler = require('../controllers/authController');
 import { checkUserJWT, checkUserPermission } from '../middleware/jwtAction';
+import upload from '../middleware/multer';
 
 const router = express.Router();
 
@@ -11,6 +11,7 @@ router.post('/logout', AuthControler.handleLogout);
 router.get('/account', checkUserJWT, AuthControler.getAccount);
 router.get('/all-user', checkUserJWT, checkUserPermission, AuthControler.getAllUser);
 router.get('/user/:id', checkUserJWT, AuthControler.getOneUser);
+router.put('/user/:id', checkUserJWT, upload('avatar').single('avatar'), AuthControler.putUser);
 router.delete('/delete-user/:id', checkUserJWT, checkUserPermission, AuthControler.deleteUser);
 
 

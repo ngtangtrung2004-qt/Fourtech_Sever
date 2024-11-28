@@ -96,11 +96,11 @@ const AuthControler = {
         console.log('check req.user>>>>> ', req.user);
         console.log('check req.token>>>>', req.token);
         if (!req.user) {
-        return res.status(401).json({
-            EC: 1,
-            message: "Unauthorized access. Please log in."
-        });
-    }
+            return res.status(401).json({
+                EC: 1,
+                message: "Unauthorized access. Please log in."
+            });
+        }
         return res.status(200).json({
             EC: 0,
             data: {
@@ -136,6 +136,29 @@ const AuthControler = {
         try {
             const idUser = req.params.id
             const data = await authServices.getOneUser(idUser)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                message: data.message,
+                EC: data.EC,
+                data: data.data
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
+    putUser: async (req, res) => {
+        try {
+            const idUser = req.params.id
+            const { gender, address } = req.body
+            const avatar = req.file ? req.file.filename : null
+
+            const data = await authServices.putUser({ idUser, avatar, gender, address })
 
             const statusCode = data.statusCode
             return res.status(statusCode).json({
