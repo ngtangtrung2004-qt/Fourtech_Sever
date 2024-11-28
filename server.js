@@ -15,6 +15,7 @@ import cartRouter from './src/routers/cartRouter'
 import paymentMethodRouter from './src/routers/paymentMethodRouter'
 import commentRouter from './src/routers/commentRouter'
 import orderRouter from './src/routers/orderRouter'
+import newsRouter from './src/routers/newsRouter'
 
 import cookieParser from 'cookie-parser';
 import path from 'path'
@@ -60,6 +61,9 @@ app.use('/api', contactRouter);
 app.use('/api', passwordController);
 //
 app.use('/api', commentRouter)
+//
+app.use('/api', newsRouter)
+
 app.use((req, res) => {
   return res.send('404 Not Found')
 })
