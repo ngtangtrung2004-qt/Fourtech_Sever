@@ -1,10 +1,12 @@
+const { where } = require("sequelize");
 const db = require("../models");
 
 const CommentController = {
   getAllComment: async (req, res) => {
     try {
       const comments = await db.review.findAll({
-        where: { parent_comment_id: null },
+        // where: { parent_comment_id: null },
+
         include: [
           {
             model: db.user,
@@ -14,7 +16,8 @@ const CommentController = {
           {
             model: db.product,
             as: "productData",
-            attributes: ["id", "name"],
+            attributes: ["id", "name", 'deleted_at'],
+            where: { deleted_at: null }
           },
         ],
         order: [["updatedAt", "DESC"]],

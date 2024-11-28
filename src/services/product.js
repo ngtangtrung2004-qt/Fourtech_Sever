@@ -7,7 +7,6 @@ const getAllProduct = async () => {
     try {
         const data = await db.product.findAll({
             attributes: ['id', 'name', 'category_id', 'brand_id', 'image', 'price', 'promotion_price', 'description', 'quantity', 'view', 'created_at'],
-            // where: { deleted_at: null },
             paranoid: true,
             include: [
                 {
@@ -187,6 +186,9 @@ const getProductByCategory = async (idCategory) => {
     try {
         const product = await db.product.findAll({
             where: { category_id: idCategory },
+            order: [
+                ['view', 'DESC']
+            ],
             include:
             {
                 model: db.category,
@@ -229,6 +231,9 @@ const getProductByBrand = async (idBrand) => {
     try {
         const product = await db.product.findAll({
             where: { brand_id: idBrand },
+            order: [
+                ['view', 'DESC']
+            ],
             include:
             {
                 model: db.brand,

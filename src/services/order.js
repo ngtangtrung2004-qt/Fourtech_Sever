@@ -90,11 +90,11 @@ const getOneOrder = async (orderIdCode) => {
                 address: dataOrder?.address,
                 cart_id: dataOrder?.cart_id,
                 total_price: dataOrder?.total_price,
+                created_at: dataOrder?.dataValues.createdAt,
                 status: dataOrder?.status,
                 note: dataOrder?.note,
                 payment_methor: dataOrder?.payment_methor,
                 payment_status: dataOrder?.payment_status,
-                created_at: dataOrder.dataValues.created_at,
                 productItem: dataOrder?.order_detailData?.map((detail) => (
                     {
                         price_product: detail?.price,
