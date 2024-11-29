@@ -36,6 +36,13 @@ const getAllOrder = async () => {
                 data: formattedData,
                 statusCode: 200
             };
+        } else {
+            return {
+                message: "Không có đơn hàng nào.",
+                EC: 0,
+                data: '',
+                statusCode: 200
+            };
         }
 
     } catch (error) {

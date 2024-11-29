@@ -19,6 +19,9 @@ const getAllProduct = async () => {
                     as: 'categoryData',
                     attributes: ['id', 'name']
                 }
+            ],
+            order: [
+                ['view', 'DESC']
             ]
         })
 
