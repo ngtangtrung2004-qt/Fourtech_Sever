@@ -20,6 +20,26 @@ const OrderController = {
         }
     },
 
+    getOrderByUser: async (req, res) => {
+        try {
+            const userId = req.params.idUser
+            const data = await OrderService.getOrderByUser(userId)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                data: data.data,
+                EC: data.EC,
+                message: data.message
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
     getOneOrder: async (req, res) => {
         try {
             const { orderIdCode } = req.params

@@ -64,8 +64,6 @@ export const checkUserJWT = (req, res, next) => {
 
 
 export const checkUserPermission = (req, res, next) => {
-    console.log("Requested Path:", req.path);
-
     if (req.user) {
         let role = req.user.role
         if (role === 'admin') {
@@ -81,7 +79,7 @@ export const checkUserPermission = (req, res, next) => {
         return res.status(401).json({
             EC: -1,
             data: '',
-            message: "Chưa xác thực người dùng!"
+            message: "Bạn không có quyền truy cập!"
         })
     }
 }

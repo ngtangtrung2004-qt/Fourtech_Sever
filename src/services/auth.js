@@ -2,6 +2,7 @@ import { where, Sequelize, Op } from 'sequelize';
 import db from '../models'
 import bcrypt, { genSaltSync } from 'bcrypt'
 import { createJWT } from '../middleware/jwtAction';
+import { deleteImage } from '../middleware/multer';
 
 const registerService = async (dataRegister) => {
     try {
@@ -168,7 +169,7 @@ const getOneUser = async (idUser) => {
             attributes: ['id', 'full_name', 'email', 'phone', 'gender', 'address', 'avatar'],
         })
 
-        if(!data) {
+        if (!data) {
             return {
                 message: "Người dùng không tồn tại",
                 EC: 1,
@@ -182,6 +183,58 @@ const getOneUser = async (idUser) => {
             EC: 0,
             data: data,
             statusCode: 200
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        }
+    }
+}
+
+const putUser = async (dataUser) => {
+    try {
+        const { idUser, avatar, gender, address } = dataUser
+
+        const user = await db.user.findOne({
+            where: { id: idUser }
+        })
+        if (user) {
+            const updateUser = await db.user.update(
+                {
+                    address: address,
+                    gender: gender,
+                    avatar: avatar ? `avatar/${avatar}` : user.avatar
+                },
+                {
+                    where: { id: idUser }
+                }
+            )
+
+
+            if (updateUser > 0) {
+                const newUser = await db.user.findOne({
+                    where: { id: idUser },
+                    attributes: ['id', 'full_name', 'email', 'phone', 'gender', 'address', 'avatar'],
+                });
+
+                return {
+                    message: "Cập nhật thông tin thành công.",
+                    EC: 0,
+                    data: newUser, // Bản ghi đã được cập nhật
+                    statusCode: 200
+                };
+            }
+        } else {
+            return {
+                message: "Không có tài khoản.",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            }
         }
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
@@ -233,5 +286,6 @@ module.exports = {
     loginService,
     getAllUser,
     getOneUser,
+    putUser,
     deleteService
 }

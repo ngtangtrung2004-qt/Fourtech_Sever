@@ -49,6 +49,33 @@ const getAllOrder = async () => {
     }
 }
 
+const getOrderByUser = async (idUser) => {
+    try {
+        const dataOrder = await db.order.findAll({
+            where: { user_id: idUser },
+            attributes: ['id', 'order_id_code', 'status', 'created_at'],
+            order: [
+                ['created_at', 'DESC']
+            ]
+        })
+        return {
+            message: "Lấy tất cả đơn hàng thành công.",
+            EC: 0,
+            data: dataOrder,
+            statusCode: 200
+        };
+
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+}
+
 const getOneOrder = async (orderIdCode) => {
     try {
         const dataOrder = await db.order.findOne({
@@ -67,7 +94,7 @@ const getOneOrder = async (orderIdCode) => {
                         {
                             model: db.product,
                             as: "productData",
-                            attributes: ['id', 'name']
+                            attributes: ['id', 'name', 'image']
                         }
                     ]
                 }
@@ -99,7 +126,8 @@ const getOneOrder = async (orderIdCode) => {
                     {
                         price_product: detail?.price,
                         quantity_product: detail?.quantity,
-                        name_product: detail?.productData?.name
+                        name_product: detail?.productData?.name,
+                        image_product: detail?.productData?.image
                     }
                 ))
             }
@@ -166,6 +194,7 @@ const putOrder = async (dataOrder) => {
 
 module.exports = {
     getAllOrder,
+    getOrderByUser,
     getOneOrder,
     putOrder
 }
