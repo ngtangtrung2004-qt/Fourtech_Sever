@@ -11,7 +11,7 @@ const router = express.Router()
 router.get('/news', NewsController.getAllNews);
 router.get('/news/:id', NewsController.getOneNews);
 router.post('/news', upload('news').single('newsImage'), NewsController.postNews, multerErrorHandler);
-// router.put('/news/update/:id', upload('brand').single('brandImage'), NewsController.putNews, multerErrorHandler);
 router.delete('/news/:id', NewsController.deleteNews);
+router.put('/news/:id', upload('news').single('newsImage'), NewsController.putNews, multerErrorHandler);
 
 module.exports = router
