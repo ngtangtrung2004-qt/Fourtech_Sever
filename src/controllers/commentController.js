@@ -144,7 +144,10 @@ const CommentController = {
         });
       }
 
-      await comment.destroy(); // Xóa liên hệ
+      await comment.destroy({
+        where: { id: id },
+        force: true, // Xóa vĩnh viễn
+      });
       return res.status(200).json({
         message: "Xóa Bình luận thành công!",
         EC: 0,

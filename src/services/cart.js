@@ -101,16 +101,14 @@ const postCart = async (dataCart) => {
         })
 
         if (cartItem) {
-            // Cập nhật số lượng nếu sản phẩm đã tồn tại trong giỏ hàng
-            cartItem.quantity += quantity; // Cộng thêm số lượng mới
             await db.cart_item.update(
-                { quantity: cartItem.quantity },
+                { quantity: quantity },
                 { where: { id: cartItem.id } }
             );
             return {
                 message: "Cập nhật số lượng sản phẩm thành công!",
                 EC: 0,
-                data: cartItem,
+                data: { ...cartItem, quantity },
                 statusCode: 200
             };
         } else {
