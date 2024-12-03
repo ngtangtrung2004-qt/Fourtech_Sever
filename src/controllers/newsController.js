@@ -3,12 +3,12 @@ import { deleteImage } from "../middleware/multer";
 
 const NewsController = {
   getAllNews: async (req, res) => {
-    try{
+    try {
 
       const news = await db.News.findAll();
       res.json(news);
-    }catch(error){
-       res.status(500).json({ message: "Không thể lấy phản hồi", error });
+    } catch (error) {
+      res.status(500).json({ message: "Không thể lấy phản hồi", error });
     }
   },
   getOneNews: async (req, res) => {
@@ -138,7 +138,69 @@ const NewsController = {
       });
     }
   },
-  putNews: async (req, res) => {},
+  
+  putNews: async (req, res) => {
+    const { id } = req.params; // Lấy ID từ URL
+    const { title, content } = req.body; // Lấy dữ liệu từ body
+    const newImage = req.file ? "news/" + req.file.filename : null; // Nếu có file upload
+
+    try {
+      // Kiểm tra nếu ID hợp lệ
+      if (!id || isNaN(id)) {
+        return res.status(400).json({
+          message: "ID bản tin không hợp lệ.",
+          EC: -1,
+          data: null,
+        });
+      }
+
+      // Tìm bản tin trong cơ sở dữ liệu
+      const news = await db.News.findOne({ where: { id: parseInt(id) } });
+
+      if (!news) {
+        return res.status(404).json({
+          message: "Tin tức không tồn tại.",
+          EC: 1,
+          data: null,
+        });
+      }
+
+      // Nếu có hình ảnh mới, xóa hình ảnh cũ
+      if (newImage && news.image) {
+        try {
+          deleteImage(__dirname, "../uploads/", news.image); // Xóa tệp hình ảnh cũ
+        } catch (error) {
+          console.error("Lỗi khi xóa tệp hình ảnh cũ:", error.message);
+          return res.status(500).json({
+            message: "Lỗi khi xóa tệp hình ảnh cũ.",
+            EC: -1,
+            data: null,
+          });
+        }
+      }
+
+      // Cập nhật bản tin
+      const updatedNews = await news.update({
+        title: title || news.title, // Nếu không gửi title mới, giữ nguyên title cũ
+        content: content || news.content,
+        image: newImage || news.image,
+      });
+
+      // Trả về phản hồi thành công
+      return res.status(200).json({
+        message: "Cập nhật tin tức thành công.",
+        EC: 0,
+        data: updatedNews,
+      });
+    } catch (error) {
+      console.error("Lỗi khi cập nhật tin tức:", error.message);
+      return res.status(500).json({
+        message: "Lỗi server khi cập nhật tin tức.",
+        EC: -2,
+        data: null,
+      });
+    }
+  },
 };
 
 module.exports = NewsController;

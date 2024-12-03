@@ -341,7 +341,7 @@ const putProduct = async (dataProduct) => {
     try {
         const { idProduct, imageProduct, name, category_id, brand_id, price, promotion_price, description, quantity } = dataProduct;
 
-        if (!name || !category_id || !brand_id || !price || !promotion_price || !description || !quantity) {
+        if (!name || !category_id || !brand_id || !price || !description || !quantity) {
             deleteImage(__dirname, '../uploads/product/', imageProduct)
             return {
                 message: "Thiếu tham số bắt buộc!",
