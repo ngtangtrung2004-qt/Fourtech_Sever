@@ -199,9 +199,107 @@ const putOrder = async (dataOrder) => {
     }
 }
 
+const putCancelOrder = async (dataOrder) => {
+    try {
+        const orderIdCode = dataOrder
+        const order = await db.order.findOne({
+            where: { order_id_code: orderIdCode }
+        })
+
+        if (order) {
+            await db.order.update(
+                {
+                    status: 3,
+                    payment_status: 3
+                },
+                {
+                    where: { order_id_code: orderIdCode }
+                }
+            );
+
+            const newOrder = await db.order.findOne({
+                where: { order_id_code: orderIdCode }
+            })
+
+            return {
+                message: "Hủy đơn hàng thành công.",
+                EC: 0,
+                data: newOrder,
+                statusCode: 200
+            }
+        } else {
+            return {
+                message: "Đơn hàng không tồn tại.",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            };
+        }
+
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+}
+
+const putFinishOrder = async (dataOrder) => {
+    try {
+        const orderIdCode = dataOrder
+        const order = await db.order.findOne({
+            where: { order_id_code: orderIdCode }
+        })
+
+        if (order) {
+            await db.order.update(
+                {
+                    status: 2,
+                    payment_status: 1
+                },
+                {
+                    where: { order_id_code: orderIdCode }
+                }
+            );
+
+            const newOrder = await db.order.findOne({
+                where: { order_id_code: orderIdCode }
+            })
+
+            return {
+                message: "Cập nhật đơn hàng thành công.",
+                EC: 0,
+                data: newOrder,
+                statusCode: 200
+            }
+        } else {
+            return {
+                message: "Đơn hàng không tồn tại.",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            };
+        }
+
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        };
+    }
+}
+
 module.exports = {
     getAllOrder,
     getOrderByUser,
     getOneOrder,
-    putOrder
+    putOrder,
+    putCancelOrder,
+    putFinishOrder
 }

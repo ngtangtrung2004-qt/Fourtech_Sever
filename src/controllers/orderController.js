@@ -79,6 +79,46 @@ const OrderController = {
                 EC: -1
             })
         }
+    },
+
+    putCancelOrder: async (req, res) => {
+        try {
+            const { orderIdCode } = req.params
+            const data = await OrderService.putCancelOrder(orderIdCode)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                data: data.data,
+                EC: data.EC,
+                message: data.message
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
+    },
+
+    putFinishOrder: async (req, res) => {
+        try {
+            const { orderIdCode } = req.params
+            const data = await OrderService.putFinishOrder(orderIdCode)
+
+            const statusCode = data.statusCode
+            return res.status(statusCode).json({
+                data: data.data,
+                EC: data.EC,
+                message: data.message
+            })
+        } catch (error) {
+            console.log('CÓ LỖI TRONG SERVER >>>', error);
+            return res.status(500).json({
+                message: "Lỗi ở Server!",
+                EC: -1
+            })
+        }
     }
 }
 

@@ -56,14 +56,9 @@ app.use('/api/', cartRouter);
 app.use('/api/', paymentMethodRouter);
 app.use('/api/', orderRouter);
 app.use('/api/', revenueRouter);
-
-//
 app.use('/api', contactRouter);
-//
 app.use('/api', passwordController);
-//
 app.use('/api', commentRouter)
-//
 app.use('/api', newsRouter)
 
 app.use((req, res) => {

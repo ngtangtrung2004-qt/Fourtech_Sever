@@ -10,26 +10,9 @@ const PaymentMethodController = {
     postCreatePaymentMomo: async (req, res) => {
         try {
             const { amount, idUser, address, cartId, orderIdCode, orderInfo, productsItem } = req.body;
-            console.log(req.body);
             var partnerCode = 'MOMO';
             var redirectUrl = `${process.env.URL_CLIENT}/thankyou`; //Link khi mà thanh toán xong sẽ nhảy vào
 
-            //Việc sử dụng localhost trong ipnUrl không phù hợp nếu bạn muốn MoMo gửi thông báo thanh toán,
-            //         //vì MoMo không thể truy cập vào localhost của máy tính hoặc server cục bộ của bạn. 
-            //         //localhost chỉ hoạt động trên máy bạn đang chạy và không khả dụng từ Internet.
-            //         //MoMo cần một URL công khai trên Internet để gửi thông báo
-
-            //         //Dùng URL công khai Nếu bạn đã triển khai server lên một host hoặc dịch vụ cloud (như Heroku, Vercel, AWS, v.v.), hãy dùng URL của server đó, ví dụ:
-            //         //var ipnUrl = 'https://your-server-domain.com/callback_payment';
-
-            //         //Dùng ngrok để thử nghiệm trên môi trường cục bộ Nếu bạn đang phát triển trên máy cá nhân 
-            //         //và muốn kiểm tra callback từ MoMo, bạn có thể dùng ngrok để tạo một URL công khai tạm 
-            //         //thời trỏ đến localhost.
-
-            //         //B1: -Máy window thì vào trang web này cài: https://dashboard.ngrok.com/get-started/setup/windows
-            //         //-Máy Mac thì vào link: https://dashboard.ngrok.com/get-started/setup/macos
-            //         //B2: Đăng ký tài khoản xong chạy lệnh theo hướng dẫn
-            //         //(Video hướng dẫn 'https://www.youtube.com/watch?v=Cxi3cHpV238')
             var ipnUrl = `${process.env.ipnUrl}/api/callback_payment`;
 
             var requestType = "captureWallet"; //dùng phương thức quét mã

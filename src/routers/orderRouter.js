@@ -8,5 +8,7 @@ router.get('/all-order', checkUserJWT, checkUserPermission, OrderController.getA
 router.get('/order-by-user/:idUser', checkUserJWT, OrderController.getOrderByUser)
 router.get('/order/:orderIdCode', checkUserJWT, OrderController.getOneOrder)
 router.put('/update/:orderIdCode', checkUserJWT, checkUserPermission, OrderController.putOrder)
+router.put('/cancel-order/:orderIdCode', checkUserJWT, OrderController.putCancelOrder)
+router.put('/finish-order/:orderIdCode', checkUserJWT, OrderController.putFinishOrder)
 
 module.exports = router
