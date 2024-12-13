@@ -12,6 +12,7 @@ router.get('/account', checkUserJWT, AuthControler.getAccount);
 router.get('/all-user', checkUserJWT, checkUserPermission, AuthControler.getAllUser);
 router.get('/user/:id', checkUserJWT, AuthControler.getOneUser);
 router.put('/user/:id', checkUserJWT, upload('avatar').single('avatar'), AuthControler.putUser);
+router.put('/user/:id/role', checkUserJWT, checkUserPermission, AuthControler.putUserRole);
 router.delete('/delete-user/:id', checkUserJWT, checkUserPermission, AuthControler.deleteUser);
 
 

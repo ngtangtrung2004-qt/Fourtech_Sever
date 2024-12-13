@@ -166,7 +166,7 @@ const getOneUser = async (idUser) => {
     try {
         const data = await db.user.findOne({
             where: { id: idUser },
-            attributes: ['id', 'full_name', 'email', 'phone', 'gender', 'address', 'avatar'],
+            attributes: ['id', 'full_name', 'email', 'phone', 'gender', 'address', 'avatar', 'role'],
         })
 
         if (!data) {
@@ -247,6 +247,55 @@ const putUser = async (dataUser) => {
     }
 }
 
+const putUserRole = async (dataUser) => {
+    try {
+        const { idUser, role } = dataUser
+
+        const user = await db.user.findOne({
+            where: { id: idUser }
+        })
+        if (user) {
+            const updateUser = await db.user.update(
+                {
+                    role: role
+                },
+                {
+                    where: { id: idUser }
+                }
+            )
+
+            if (updateUser > 0) {
+                const newUser = await db.user.findOne({
+                    where: { id: idUser },
+                    attributes: ['id', 'full_name', 'email', 'phone', 'role', 'created_at'],
+                });
+
+                return {
+                    message: "Cập nhật thông tin thành công.",
+                    EC: 0,
+                    data: newUser, // Bản ghi đã được cập nhật
+                    statusCode: 200
+                };
+            }
+        } else {
+            return {
+                message: "Không có tài khoản.",
+                EC: 1,
+                data: '',
+                statusCode: 404
+            }
+        }
+    } catch (error) {
+        console.log('CÓ LỖI TRONG SERVICE >>>', error);
+        return {
+            message: "Có lỗi trong Service!",
+            EC: -1,
+            data: '',
+            statusCode: 500
+        }
+    }
+}
+
 const deleteService = async (id) => {
     try {
         const user = await db.user.findOne({
@@ -287,5 +336,6 @@ module.exports = {
     getAllUser,
     getOneUser,
     putUser,
+    putUserRole,
     deleteService
 }
