@@ -17,7 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     UserContact: DataTypes.STRING,
     EmailContact: DataTypes.STRING,
     PhoneContact: DataTypes.STRING,
-    messageContact: DataTypes.STRING
+    messageContact: DataTypes.STRING,
+    isReplied: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false, // Giá trị mặc định
+  },
   }, {
     sequelize,
     modelName: 'Contact',
