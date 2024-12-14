@@ -28,7 +28,7 @@ const BrandController = {
     postBrand: async (req, res) => {
         try {
             const { brandName } = req.body
-            const brandImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
+            const brandImage = req.file ? req.file.filename : null;
 
             const data = await BrandService.postBrand({ ...req.body, brandImage })
 
@@ -41,7 +41,7 @@ const BrandController = {
         } catch (error) {
             console.log('CÓ LỖI TRONG SERVER >>>', error);
 
-            const brandImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
+            const brandImage = req.file ? req.file.filename : null;
             deleteImage(__dirname, '../uploads/brand/', brandImage)
 
             return res.status(500).json({
@@ -68,7 +68,7 @@ const BrandController = {
         } catch (error) {
             console.log('CÓ LỖI TRONG SERVER >>>', error);
 
-            const brandImage = req.file ? req.file.filename : null; // Lấy tên file từ req.file nếu có
+            const brandImage = req.file ? req.file.filename : null;
             deleteImage(__dirname, '../uploads/brand/', brandImage)
 
             return res.status(500).json({

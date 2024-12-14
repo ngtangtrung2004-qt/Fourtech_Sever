@@ -8,10 +8,10 @@ const getCart = async (dataCart) => {
             where: { user_id: user_id },
             include: [
                 {
-                    model: db.cart_item, // Đảm bảo sử dụng đúng tên alias/model
+                    model: db.cart_item,
                     as: 'cart_itemData',
                     include: {
-                        model: db.product, // Tham chiếu đúng đến model sản phẩm
+                        model: db.product,
                         as: 'productData',
                     }
                 }
@@ -27,12 +27,10 @@ const getCart = async (dataCart) => {
             }
         }
 
-        // Lọc các mục giỏ hàng có sản phẩm không hợp lệ
         const invalidCartItems = Array.isArray(cart.cart_itemData)
             ? cart.cart_itemData.filter(item => item.productData === null)
-            : []; // Nếu không phải mảng, trả về mảng rỗng
+            : [];
 
-        // Xóa các mục giỏ hàng không hợp lệ
         for (const item of invalidCartItems) {
             await db.cart_item.destroy({
                 where: { id: item.id },
@@ -40,10 +38,9 @@ const getCart = async (dataCart) => {
             })
         }
 
-        // Lấy lại các mục giỏ hàng hợp lệ
         const validCartItems = Array.isArray(cart.cart_itemData)
             ? cart.cart_itemData.filter(item => item.productData !== null)
-            : []; // Nếu không phải mảng, trả về mảng rỗng
+            : [];
 
         return {
             message: "Lấy giỏ hàng thành công.",
@@ -66,8 +63,6 @@ const getCart = async (dataCart) => {
 const postCart = async (dataCart) => {
     try {
         const { user_id, product_id, quantity } = dataCart
-
-        // Kiểm tra sản phẩm có tồn tại không
         const product = await db.product.findOne({
             where: { id: product_id }
         });
@@ -80,13 +75,10 @@ const postCart = async (dataCart) => {
                 statusCode: 404
             };
         }
-
-        //kiểm tra giỏ hàng đã tồn tại cho người dùng
         let cart = await db.cart.findOne({
             where: { user_id: user_id }
         })
 
-        //nếu chưa có thì tạo giỏ hàng
         if (!cart) {
             cart = await db.cart.create({
                 user_id: user_id,
@@ -112,7 +104,6 @@ const postCart = async (dataCart) => {
                 statusCode: 200
             };
         } else {
-            // Thêm mới sản phẩm vào giỏ hàng nếu chưa có
             const newCartItem = await db.cart_item.create({
                 cart_id: cart.id,
                 product_id,
@@ -151,7 +142,6 @@ const deleteCartItem = async (data) => {
         });
 
         if (result) {
-            // Lấy lại giỏ hàng sau khi xóa
             const updatedCart = await db.cart_item.findAll({
                 where: { cart_id: cartId },
                 include: [{ model: db.product, as: 'productData' }],
@@ -160,7 +150,7 @@ const deleteCartItem = async (data) => {
             return {
                 message: 'Xóa sản phẩm trong giỏ hàng thành công.',
                 EC: 0,
-                data: updatedCart, // Trả về danh sách giỏ hàng còn lại
+                data: updatedCart,
                 statusCode: 200,
             };
         } else {

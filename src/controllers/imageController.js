@@ -12,7 +12,6 @@ const ImageController = {
 
         const duongDanHinhAnh = path.join(__dirname, '../uploads', type, filename);
 
-        // Kiểm tra nếu tệp hình ảnh tồn tại
         fs.stat(duongDanHinhAnh, (err, stats) => {
             if (err || !stats.isFile()) {
                 return res.status(404).json({ message: 'Không tìm thấy hình ảnh' });

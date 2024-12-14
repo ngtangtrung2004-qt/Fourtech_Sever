@@ -1,6 +1,4 @@
 import * as CategoryService from '../services/category'
-import path from 'path'
-import fs from 'fs'
 import { deleteImage } from '../middleware/multer';
 
 const CategoryController = {

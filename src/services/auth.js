@@ -141,7 +141,7 @@ const getAllUser = async () => {
         const data = await db.user.findAll({
             attributes: ['id', 'full_name', 'email', 'phone', 'role', 'created_at'],
             order: [
-                ['created_at', 'DESC']  // Sắp xếp theo trường 'created_at' giảm dần (DESC)
+                ['created_at', 'DESC']
             ]
         })
 
@@ -224,7 +224,7 @@ const putUser = async (dataUser) => {
                 return {
                     message: "Cập nhật thông tin thành công.",
                     EC: 0,
-                    data: newUser, // Bản ghi đã được cập nhật
+                    data: newUser,
                     statusCode: 200
                 };
             }
@@ -273,7 +273,7 @@ const putUserRole = async (dataUser) => {
                 return {
                     message: "Cập nhật thông tin thành công.",
                     EC: 0,
-                    data: newUser, // Bản ghi đã được cập nhật
+                    data: newUser,
                     statusCode: 200
                 };
             }

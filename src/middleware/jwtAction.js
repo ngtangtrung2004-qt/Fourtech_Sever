@@ -35,9 +35,7 @@ export const extractToken = (req) => {
 }
 
 export const checkUserJWT = (req, res, next) => {
-
     let tokenFormHeader = extractToken(req)
-    //if (cookies && cookies.jwt) {
     if (tokenFormHeader) {
         let token = tokenFormHeader
         let decoded = verifyToken(token)
@@ -60,8 +58,6 @@ export const checkUserJWT = (req, res, next) => {
         })
     }
 }
-
-
 
 export const checkUserPermission = (req, res, next) => {
     if (req.user) {

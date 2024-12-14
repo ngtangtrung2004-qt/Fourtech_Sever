@@ -14,17 +14,15 @@ const NewsController = {
   getOneNews: async (req, res) => {
     const idNews = req.params.id;
 
-    // Kiểm tra `idNews` là số hợp lệ
     if (!idNews || isNaN(idNews)) {
       return res.status(400).json({
         message: "ID bản tin không hợp lệ.",
-        EC: -1, // Error Code -1: Dữ liệu không hợp lệ
+        EC: -1,
         data: null,
       });
     }
 
     try {
-      // Tìm bản tin theo ID
       const news = await db.News.findOne({
         where: { id: parseInt(idNews) },
         attributes: [
@@ -34,30 +32,27 @@ const NewsController = {
           "image",
           "createdAt",
           "updatedAt",
-        ], // Chỉ lấy các trường cần thiết
+        ],
       });
 
-      // Kiểm tra nếu không tìm thấy
       if (!news) {
         return res.status(404).json({
           message: "Bản tin không tồn tại.",
-          EC: 1, // Error Code 1: Không tìm thấy
+          EC: 1,
           data: null,
         });
       }
 
-      // Trả về kết quả nếu tìm thấy
       return res.status(200).json({
         message: "Lấy chi tiết bản tin thành công.",
-        EC: 0, // Error Code 0: Thành công
+        EC: 0,
         data: news,
       });
     } catch (error) {
-      // Log lỗi và trả về lỗi server
       console.error("Lỗi khi lấy Tin tức:", error);
       return res.status(500).json({
         message: "Lỗi khi lấy Tin tức.",
-        EC: -2, // Error Code -2: Lỗi từ server
+        EC: -2,
         data: null,
         error: error.message,
       });
@@ -74,7 +69,7 @@ const NewsController = {
       });
       res.json(news);
     } catch {
-      console.error("Lỗi khi lấy Tin tức:", error); // Log lỗi để debug
+      console.error("Lỗi khi lấy Tin tức:", error);
       res.status(500).json({ message: "Lỗi khi lấy Tin tức", error });
     }
   },
@@ -82,7 +77,6 @@ const NewsController = {
     const { id } = req.params;
 
     try {
-      // Tìm tin tức trong cơ sở dữ liệu
       const news = await db.News.findOne({
         where: { id: id },
       });
@@ -95,14 +89,10 @@ const NewsController = {
           statusCode: 404,
         });
       }
-
-      // Lấy tên tệp hình ảnh từ bản ghi tin tức
       const newsImage = news.image;
-
-      // Xóa tệp hình ảnh (nếu có)
       if (newsImage) {
         try {
-          deleteImage(__dirname, "../uploads/", newsImage); // Hàm tự viết để xóa ảnh
+          deleteImage(__dirname, "../uploads/", newsImage);
           console.log("Tệp hình ảnh đã được xóa.");
         } catch (error) {
           console.error(
@@ -117,11 +107,7 @@ const NewsController = {
           });
         }
       }
-
-      // Xóa tin tức khỏi cơ sở dữ liệu
       await news.destroy();
-
-      // Trả về phản hồi thành công
       return res.status(200).json({
         message: "Xóa tin tức thành công.",
         EC: 0,
@@ -129,7 +115,7 @@ const NewsController = {
         statusCode: 200,
       });
     } catch (error) {
-      console.error("Lỗi khi xóa tin tức:", error.message); // Log lỗi để dễ debug
+      console.error("Lỗi khi xóa tin tức:", error.message);
       return res.status(500).json({
         message: "Lỗi server khi xóa tin tức.",
         EC: -1,
@@ -138,14 +124,13 @@ const NewsController = {
       });
     }
   },
-  
+
   putNews: async (req, res) => {
-    const { id } = req.params; // Lấy ID từ URL
-    const { title, content } = req.body; // Lấy dữ liệu từ body
-    const newImage = req.file ? "news/" + req.file.filename : null; // Nếu có file upload
+    const { id } = req.params;
+    const { title, content } = req.body;
+    const newImage = req.file ? "news/" + req.file.filename : null;
 
     try {
-      // Kiểm tra nếu ID hợp lệ
       if (!id || isNaN(id)) {
         return res.status(400).json({
           message: "ID bản tin không hợp lệ.",
@@ -153,8 +138,6 @@ const NewsController = {
           data: null,
         });
       }
-
-      // Tìm bản tin trong cơ sở dữ liệu
       const news = await db.News.findOne({ where: { id: parseInt(id) } });
 
       if (!news) {
@@ -164,11 +147,9 @@ const NewsController = {
           data: null,
         });
       }
-
-      // Nếu có hình ảnh mới, xóa hình ảnh cũ
       if (newImage && news.image) {
         try {
-          deleteImage(__dirname, "../uploads/", news.image); // Xóa tệp hình ảnh cũ
+          deleteImage(__dirname, "../uploads/", news.image);
         } catch (error) {
           console.error("Lỗi khi xóa tệp hình ảnh cũ:", error.message);
           return res.status(500).json({
@@ -179,14 +160,11 @@ const NewsController = {
         }
       }
 
-      // Cập nhật bản tin
       const updatedNews = await news.update({
-        title: title || news.title, // Nếu không gửi title mới, giữ nguyên title cũ
+        title: title || news.title,
         content: content || news.content,
         image: newImage || news.image,
       });
-
-      // Trả về phản hồi thành công
       return res.status(200).json({
         message: "Cập nhật tin tức thành công.",
         EC: 0,

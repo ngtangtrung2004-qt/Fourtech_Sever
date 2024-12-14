@@ -28,54 +28,52 @@ const CommentController = {
     }
   },
   getComment: async (req, res) => {
-    const { product_id } = req.params; // Lấy product_id từ params
-    const { page = 1, limit = 5 } = req.query; // Lấy page và limit từ query params
-    const offset = (page - 1) * limit; // Tính offset cho phân trang
+    const { product_id } = req.params;
+    const { page = 1, limit = 5 } = req.query;
+    const offset = (page - 1) * limit;
 
     try {
-      // Lấy danh sách bình luận cha
       const { count, rows } = await db.review.findAndCountAll({
-        where: { product_id, parent_comment_id: null }, // Bình luận gốc
+        where: { product_id, parent_comment_id: null },
         include: [
           {
-            model: db.user, // Kết nối với bảng user
-            as: "userData", // Alias cho mối quan hệ
-            attributes: ["id", "full_name", "role"], // Lấy các cột cần thiết
+            model: db.user,
+            as: "userData",
+            attributes: ["id", "full_name", "role"],
           },
           {
-            model: db.review, // Bao gồm phản hồi (bình luận con)
+            model: db.review,
             as: "replies",
             include: [
               {
-                model: db.user, // Kết nối user cho phản hồi
+                model: db.user,
                 as: "userData",
                 attributes: ["id", "full_name", "role"],
               },
             ],
           },
         ],
-        limit: parseInt(limit), // Số lượng bình luận mỗi trang
-        offset: parseInt(offset), // Vị trí bắt đầu
-        order: [["updatedAt", "DESC"]], // Sắp xếp theo thời gian cập nhật
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [["updatedAt", "DESC"]],
       });
 
-      // Trả về kết quả
       res.status(200).json({
-        total: count, // Tổng số bình luận gốc
-        page: parseInt(page), // Trang hiện tại
-        limit: parseInt(limit), // Số lượng bình luận mỗi trang
-        totalPages: Math.ceil(count / limit), // Tổng số trang
-        comments: rows, // Danh sách bình luận
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit),
+        comments: rows,
       });
     } catch (error) {
-      console.error("Lỗi khi lấy bình luận:", error); // Log lỗi để debug
+      console.error("Lỗi khi lấy bình luận:", error);
       res.status(500).json({ message: "Lỗi khi lấy bình luận", error });
     }
   },
   postComment: async (req, res) => {
-    const { product_id } = req.params; // Lấy product_id từ URL
-    const { content, rating, parent_comment_id } = req.body; // Lấy dữ liệu từ client
-    const user_id = req.user?.id; // Lấy user_id từ token
+    const { product_id } = req.params;
+    const { content, rating, parent_comment_id } = req.body;
+    const user_id = req.user?.id;
     if (!user_id) {
       return res.status(401).json({
         message: "Bạn phải đăng nhập để bình luận.",
@@ -88,10 +86,10 @@ const CommentController = {
         rating,
         product_id,
         user_id: user_id,
-        parent_comment_id: parent_comment_id || null, // Nếu không có, mặc định là null
+        parent_comment_id: parent_comment_id || null,
       });
       const user = await db.user.findByPk(user_id, {
-        attributes: ["id", "full_name", "role"], // Chỉ lấy các thông tin cần thiết
+        attributes: ["id", "full_name", "role"],
       });
 
       if (!user) {
@@ -99,8 +97,6 @@ const CommentController = {
           message: "Người dùng không tồn tại.",
         });
       }
-
-      // Chuẩn bị dữ liệu phản hồi
       const responseComment = {
         id: newComment.id,
         content: newComment.content,
@@ -117,7 +113,6 @@ const CommentController = {
         replies: [],
       };
 
-      // Trả về phản hồi
       return res.status(201).json({
         message: "Thêm bình luận thành công!",
         comment: responseComment,
@@ -135,7 +130,7 @@ const CommentController = {
         where: {
           id: id,
         },
-      }); // Tìm liên hệ theo ID
+      });
       if (!comment) {
         return res.status(404).json({
           message: "Không tìm thấy bình luận!",
@@ -146,7 +141,7 @@ const CommentController = {
 
       await comment.destroy({
         where: { id: id },
-        force: true, // Xóa vĩnh viễn
+        force: true,
       });
       return res.status(200).json({
         message: "Xóa Bình luận thành công!",

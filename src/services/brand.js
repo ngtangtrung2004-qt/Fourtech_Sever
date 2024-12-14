@@ -1,7 +1,5 @@
 import { where } from "sequelize";
 import db from "../models";
-import path from 'path'
-import fs from 'fs'
 import { deleteImage } from "../middleware/multer";
 
 const getAllBrand = async () => {
@@ -65,9 +63,7 @@ const postBrand = async (brandData) => {
         let isNameBrandExist = await checkBrandName(brandName)
 
         if (isNameBrandExist) {
-
             deleteImage(__dirname, '../uploads/brand/', brandImage)
-
             return {
                 EC: 1,
                 message: "Tên thương hiệu đã tồn tại!",
@@ -102,7 +98,6 @@ const postBrand = async (brandData) => {
     }
 };
 
-
 const putBrand = async (brandEditData) => {
     try {
         const { id, brandName, brandImage } = brandEditData;
@@ -117,13 +112,11 @@ const putBrand = async (brandEditData) => {
             }
         }
 
-        // Tìm thương hiệu theo ID
         let idBrand = await db.brand.findOne({
             where: { id: id }
         });
 
         if (idBrand) {
-            // Kiểm tra xem tên thương hiệu mới có tồn tại trong cơ sở dữ liệu nhưng không phải là thương hiệu hiện tại
             let nameExists = await db.brand.findOne({
                 where: {
                     name: brandName,
@@ -141,18 +134,15 @@ const putBrand = async (brandEditData) => {
                 };
             }
 
-            // Cập nhật thương hiệu với tên và ảnh mới (nếu có)
             const updatedbrand = await db.brand.update(
                 {
                     name: brandName,
-                    logo: brandImage ? `brand/${brandImage}` : idBrand.logo // nếu không có ảnh mới thì giữ ảnh cũ
+                    logo: brandImage ? `brand/${brandImage}` : idBrand.logo
                 },
                 {
                     where: { id: idBrand.id }
                 }
             );
-
-            // Xóa ảnh cũ trong thư mục uploads khi update ảnh mới
             if (brandImage && brandImage !== idBrand.logo) {
                 console.log('xóa');
                 deleteImage(__dirname, '../uploads/', idBrand.logo);
@@ -203,7 +193,6 @@ const deleteBrand = async (id) => {
             }
         }
 
-        // Tìm thương hiệu trong cơ sở dữ liệu
         const brand = await db.brand.findOne({
             where: {
                 id: id
@@ -211,7 +200,6 @@ const deleteBrand = async (id) => {
         });
 
         if (brand) {
-            // Lấy tên tệp hình ảnh
             const brandImage = brand.logo;
             deleteImage(__dirname, '../uploads/', brandImage)
 
@@ -229,9 +217,8 @@ const deleteBrand = async (id) => {
                 }
             }
 
-            // Xóa thương hiệu khỏi cơ sở dữ liệu
             await brand.destroy({
-                where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
+                where: { id: id },
                 force: true
             });
 

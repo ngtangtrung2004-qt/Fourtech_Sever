@@ -1,13 +1,9 @@
-import { Sequelize, where } from "sequelize"
 const bcrypt = require('bcrypt');
-import db from '../models'
 import * as authServices from "../services/auth.js"
-import { token } from "morgan";
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const User = require('../models/user'); // Đảm bảo đường dẫn đúng
+const User = require('../models/user');
 const { Op } = require('sequelize');
-
 
 const AuthControler = {
     handleRegsiter: async (req, res) => {
@@ -46,17 +42,6 @@ const AuthControler = {
             }
 
             const data = await authServices.loginService(req.body)
-
-            // if (data && data.data && data.data.access_token) {
-            //     // Lấy thời gian hiện tại
-            //     const currentDate = new Date();
-            //     // Cộng thêm 1 ngày vào thời gian hiện tại
-            //     currentDate.setDate(currentDate.getDate() + 1);
-            //     res.cookie('jwt', data.data.access_token, { httpOnly: true, expires: currentDate })
-            // }
-
-            //Khi httpOnly được đặt là true, cookie này sẽ chỉ có thể truy cập được bởi server thông qua HTTP và không thể truy cập từ JavaScript của client.
-            //60 * 60 * 1000 bằng 3.600.000 mili giây, tức là cookie sẽ tồn tại trong 1 giờ kể từ khi được thiết lập.
 
             const statusCode = data.statusCode
             return res.status(statusCode).json({

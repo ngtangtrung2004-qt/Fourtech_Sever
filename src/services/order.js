@@ -6,7 +6,7 @@ const getAllOrder = async () => {
         const dataOrder = await db.order.findAll({
             attributes: ['id', 'user_id', 'total_price', 'status', 'payment_status', 'order_id_code', 'created_at'],
             order: [
-                ['created_at', 'DESC']  // Sắp xếp theo trường 'created_at' giảm dần (DESC)
+                ['created_at', 'DESC']
             ],
             include: [
                 {
@@ -166,11 +166,11 @@ const putOrder = async (dataOrder) => {
         if (order) {
             await db.order.update(
                 {
-                    status: newStatus, // Dữ liệu cần cập nhật
+                    status: newStatus,
                     payment_status: newPaymentStatus
                 },
                 {
-                    where: { order_id_code: orderIdCode } // Điều kiện để tìm bản ghi
+                    where: { order_id_code: orderIdCode }
                 }
             );
 

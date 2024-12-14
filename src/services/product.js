@@ -30,9 +30,9 @@ const getAllProduct = async () => {
                 id: pro.id,
                 name: pro.name,
                 category_id: pro.category_id,
-                category_name: pro.categoryData ? pro.categoryData.name : null, // Lấy tên sản phẩm nếu tồn tại
+                category_name: pro.categoryData ? pro.categoryData.name : null,
                 brand_id: pro.brand_id,
-                brand_name: pro.brandData ? pro.brandData.name : null, // Lấy tên thương hiệu nếu tồn tại
+                brand_name: pro.brandData ? pro.brandData.name : null,
                 image: pro.image,
                 price: pro.price,
                 promotion_price: pro.promotion_price,
@@ -67,7 +67,7 @@ const getAllProductTrash = async () => {
             attributes: ['id', 'name', 'category_id', 'brand_id', 'image', 'price', 'promotion_price', 'description', 'quantity', 'view', 'created_at'],
             where: {
                 deleted_at: {
-                    [db.Sequelize.Op.ne]: null // Lấy các bản ghi có `deleted_at` khác `null`
+                    [db.Sequelize.Op.ne]: null
                 }
             },
             paranoid: false,
@@ -90,9 +90,9 @@ const getAllProductTrash = async () => {
                 id: pro.id,
                 name: pro.name,
                 category_id: pro.category_id,
-                category_name: pro.categoryData ? pro.categoryData.name : null, // Lấy tên sản phẩm nếu tồn tại
+                category_name: pro.categoryData ? pro.categoryData.name : null,
                 brand_id: pro.brand_id,
-                brand_name: pro.brandData ? pro.brandData.name : null, // Lấy tên thương hiệu nếu tồn tại
+                brand_name: pro.brandData ? pro.brandData.name : null,
                 image: pro.image,
                 price: pro.price,
                 promotion_price: pro.promotion_price,
@@ -121,7 +121,6 @@ const getAllProductTrash = async () => {
     }
 }
 
-
 const getOneProduct = async (idProduct) => {
     const id = idProduct
     try {
@@ -148,9 +147,9 @@ const getOneProduct = async (idProduct) => {
                 id: data.id,
                 name: data.name,
                 category_id: data.category_id,
-                category_name: data.categoryData ? data.categoryData.name : null, // Lấy tên sản phẩm nếu tồn tại
+                category_name: data.categoryData ? data.categoryData.name : null,
                 brand_id: data.brand_id,
-                brand_name: data.brandData ? data.brandData.name : null, // Lấy tên thương hiệu nếu tồn tại
+                brand_name: data.brandData ? data.brandData.name : null,
                 image: data.image,
                 price: data.price,
                 promotion_price: data.promotion_price,
@@ -270,7 +269,6 @@ const getProductByBrand = async (idBrand) => {
             EC: -1,
             data: '',
             statusCode: 500
-
         }
     }
 }
@@ -299,10 +297,9 @@ const postProduct = async (dataProduct) => {
             }
         }
 
-        // Nếu imageProduct là mảng ảnh, thêm tiền tố "product/" vào tất cả các ảnh
         const imagesWithPrefix = Array.isArray(imageProduct)
             ? imageProduct.map(image => `product/${image}`)
-            : [`product/${imageProduct}`]; // Thêm tiền tố cho ảnh nếu chỉ có 1 ảnh
+            : [`product/${imageProduct}`];
 
         const data = await db.product.create({
             name: nameProduct,
@@ -314,8 +311,6 @@ const postProduct = async (dataProduct) => {
             quantity: quantity,
             image: imagesWithPrefix
         })
-
-        // deleteImage(__dirname, '../uploads/product/', imageProduct)
         return {
             message: "Thêm sản phẩm thành công.",
             EC: 0,
@@ -324,10 +319,8 @@ const postProduct = async (dataProduct) => {
         }
     } catch (error) {
         console.log('CÓ LỖI TRONG SERVICE >>>', error);
-
         const { imageProduct } = dataProduct
         deleteImage(__dirname, '../uploads/product/', imageProduct)
-
         return {
             message: "Có lỗi trong Service!",
             data: '',
@@ -355,12 +348,11 @@ const putProduct = async (dataProduct) => {
             where: { id: idProduct }
         })
 
-        // Nếu không có ảnh mới, giữ lại ảnh cũ
         const imagesWithPrefix = imageProduct && imageProduct.length > 0
             ? Array.isArray(imageProduct)
                 ? imageProduct.map(image => `product/${image}`)
-                : [`product/${imageProduct}`] // Thêm tiền tố cho ảnh nếu chỉ có 1 ảnh
-            : undefined; // Nếu không có ảnh mới, không cần cập nhật ảnh
+                : [`product/${imageProduct}`]
+            : undefined;
 
         if (id) {
             const data = await db.product.update(
@@ -381,7 +373,7 @@ const putProduct = async (dataProduct) => {
 
             if (data) {
                 if (imagesWithPrefix) {
-                    deleteImage(__dirname, '../uploads/', id.image); // Xóa ảnh cũ nếu có ảnh mới
+                    deleteImage(__dirname, '../uploads/', id.image);
                 }
                 return {
                     EC: 0,
@@ -423,7 +415,6 @@ const putProduct = async (dataProduct) => {
 
 const deleteSoftProduct = async (id) => {
     try {
-
         const orderDetail = await db.order_detail.findAll({
             where: { product_id: id }
         })
@@ -436,8 +427,6 @@ const deleteSoftProduct = async (id) => {
                 statusCode: 409
             };
         }
-
-        // Tìm sản phẩm trong cơ sở dữ liệu
         const product = await db.product.findOne({
             where: {
                 id: id
@@ -445,7 +434,6 @@ const deleteSoftProduct = async (id) => {
         });
 
         if (product) {
-            // Xóa sản phẩm khỏi cơ sở dữ liệu
             await product.destroy({
                 where: { id: product }
             });
@@ -477,7 +465,6 @@ const deleteSoftProduct = async (id) => {
 
 const restoreProduct = async (id) => {
     try {
-        // Tìm sản phẩm trong cơ sở dữ liệu
         const product = await db.product.findOne({
             where: {
                 id: id,
@@ -488,7 +475,6 @@ const restoreProduct = async (id) => {
         console.log(product);
 
         if (product) {
-            // Khôi phục sản phẩm
             await product.restore();
 
             return {
@@ -518,16 +504,14 @@ const restoreProduct = async (id) => {
 
 const deleteProduct = async (id) => {
     try {
-        // Tìm sản phẩm trong cơ sở dữ liệu
         const product = await db.product.findOne({
             where: { id: id },
             paranoid: false, // Để lấy cả các bản ghi đã bị xóa mềm
         });
 
         if (product) {
-            // Nếu không có mục cart_item tham chiếu, có thể xóa sản phẩm
             await db.product.destroy({
-                where: { id: id }, // Sửa lại để xóa sản phẩm bằng id
+                where: { id: id },
                 force: true
             });
             const productImage = product.image;
@@ -572,15 +556,13 @@ const deleteProduct = async (id) => {
     }
 };
 
-
-
 const postView = async (id) => {
     try {
         const product = await db.product.findOne({
             where: { id: id }
         });
         if (product) {
-            product.view += 1; // Tăng số lượt xem
+            product.view += 1;
             await product.save();
             return {
                 message: 'Lượt xem đã cập nhật',

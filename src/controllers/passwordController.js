@@ -1,6 +1,5 @@
 
 const bcrypt = require('bcrypt');
-// import db from '../models'
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { Op } = require('sequelize');
@@ -23,15 +22,12 @@ const PasswordController = {
       return res.status(404).json({ message: 'Email không tồn tại.' });
     }
 
-    // Tạo token ngẫu nhiên và thời gian hết hạn
     const token = crypto.randomBytes(32).toString('hex');
-    const expiration = Date.now() + 3600000; // Hết hạn sau 1 giờ
+    const expiration = Date.now() + 3600000;
 
     user.reset_token = token;
     user.reset_token_expiration = expiration;
     await user.save();
-
-    // Gửi email với liên kết đặt lại mật khẩu
     const resetLink = `http://localhost:5173/reset-password/${token}`;
     await transporter.sendMail({
       from: process.env.EMAIL_USERNAME,

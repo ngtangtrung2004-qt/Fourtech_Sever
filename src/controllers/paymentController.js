@@ -3,26 +3,24 @@ require('dotenv').config()
 const crypto = require('crypto');
 const db = require('../models');
 const { where } = require('sequelize');
-var accessKey = process.env.ACCESS_KEY; //mã được cung cấp để Test accessKey
-var secretKey = process.env.SECRET_KEY; //mã được cung cấp để Test secretKey
+var accessKey = process.env.ACCESS_KEY;
+var secretKey = process.env.SECRET_KEY;
 
 const PaymentMethodController = {
     postCreatePaymentMomo: async (req, res) => {
         try {
             const { amount, idUser, address, cartId, orderIdCode, orderInfo, productsItem } = req.body;
             var partnerCode = 'MOMO';
-            var redirectUrl = `${process.env.URL_CLIENT}/thankyou`; //Link khi mà thanh toán xong sẽ nhảy vào
+            var redirectUrl = `${process.env.URL_CLIENT}/thankyou`;
 
             var ipnUrl = `${process.env.ipnUrl}/api/callback_payment`;
 
-            var requestType = "captureWallet"; //dùng phương thức quét mã
+            var requestType = "captureWallet";
             var extraData = '';
             var orderGroupId = '';
             var autoCapture = true;
             var lang = 'vi';
             var requestId = orderIdCode;
-
-            // Tạo chuỗi cần ký HMAC SHA256
             var rawSignature =
                 'accessKey=' +
                 accessKey +
@@ -45,11 +43,10 @@ const PaymentMethodController = {
                 '&requestType=' +
                 requestType;
 
-            // Tạo chữ ký HMAC SHA256
             var signature = crypto
-                .createHmac('sha256', secretKey)  // Bắt đầu tạo HMAC với thuật toán SHA-256
-                .update(rawSignature)  // Cập nhật chuỗi dữ liệu cần mã hóa (rawSignature)
-                .digest('hex'); // Chuyển chữ ký thành chuỗi định dạng hexadecimal (hex)
+                .createHmac('sha256', secretKey)
+                .update(rawSignature)
+                .digest('hex');
 
             //Tạo payload gửi đến MoMo
             const requestBody = JSON.stringify({
@@ -78,18 +75,17 @@ const PaymentMethodController = {
                 },
             })
 
-            // Kiểm tra phản hồi và trả kết quả về giao diện người dùng
             if (response.data && response.data.payUrl) {
                 const order = await db.order.create({
-                    user_id: idUser,  // Truyền vào từ request hoặc tìm từ DB
-                    cart_id: cartId,  // Truyền vào từ request
-                    address: address,  // Địa chỉ lấy từ request
+                    user_id: idUser,
+                    cart_id: cartId,
+                    address: address,
                     status: 0,
-                    payment_status: 0, //Chưa thanh toán
-                    total_price: amount,// Tổng giá trị thanh toán từ MoMo
-                    order_id_code: orderIdCode,// Mã đơn hàng
-                    note: req.body.note,// Ghi chú đơn hàng
-                    payment_methor: orderInfo,// Phương thức thanh toán là MoMo
+                    payment_status: 0,
+                    total_price: amount,
+                    order_id_code: orderIdCode,
+                    note: req.body.note,
+                    payment_methor: orderInfo,
                 });
 
                 for (const item of productsItem) {
@@ -101,13 +97,12 @@ const PaymentMethodController = {
                     })
                 }
 
-
                 return res.json({
                     success: true,
                     orderId: response.data.orderId,
                     amount: response.data.amount,
                     message: 'Tạo yêu cầu thanh toán thành công',
-                    payUrl: response.data.payUrl // Link thanh toán MoMo
+                    payUrl: response.data.payUrl
                 });
             } else {
                 return res.status(400).json({
@@ -144,7 +139,7 @@ const PaymentMethodController = {
                 signature: signature,
                 lang: 'vi',
             });
-            // Gửi yêu cầu kiểm tra trạng thái giao dịch
+
             const response = await axios.post(
                 'https://test-payment.momo.vn/v2/gateway/api/query',
                 requestBody,
@@ -158,7 +153,7 @@ const PaymentMethodController = {
             const paymentResponse = response.data;
 
             if (paymentResponse.resultCode === 0) {
-                // Tìm lại đơn hàng từ cơ sở dữ liệu bằng orderId
+
                 const order = await db.order.findOne({
                     where: { order_id_code: orderId }
                 })
@@ -170,18 +165,13 @@ const PaymentMethodController = {
                         message: 'Không tìm thấy đơn hàng với orderIdCode: ' + orderId
                     });
                 } else {
-                    // Cập nhật trạng thái thanh toán thành công
                     await db.order.update(
                         { payment_status: 1 },
                         { where: { order_id_code: orderId } }
                     );
-
-                    //Lấy danh sách các sản phẩm đã mua trong đơn hàng.
                     const orderDetails = await db.order_detail.findAll({
                         where: { order_id: order.id },
                     });
-
-                    //Giảm quantity trong bảng product với số lượng tương ứng đã mua
                     for (const item of orderDetails) {
                         const product = await db.product.findOne({
                             where: { id: item.product_id },
@@ -190,16 +180,12 @@ const PaymentMethodController = {
                         if (product.quantity < item.quantity) {
                             throw new Error(`Không đủ số lượng sản phẩm ID: ${item.product_id}`);
                         }
-
-                        //increment là một phương thức được sử dụng để tăng (hoặc giảm) giá trị của một hoặc nhiều cột trong cơ sở dữ liệu một cách trực tiếp
                         await db.product.increment(
                             { quantity: -item.quantity },
                             { where: { id: item.product_id } }
                         );
                     }
 
-
-                    //Xóa sản phẩm trong giỏ hàng khi thanh toán xong
                     const cartItem = await db.cart_item.findOne({
                         where: { cart_id: order.cart_id }
                     })
@@ -253,7 +239,6 @@ const PaymentMethodController = {
                 })
             }
 
-            // Kiểm tra sự tồn tại của người dùng
             const userId = await db.user.findOne({
                 where: { id: idUser }
             })
@@ -266,20 +251,18 @@ const PaymentMethodController = {
                 })
             }
 
-            // Tạo đơn hàng mới
             const order = await db.order.create({
                 user_id: idUser,
                 cart_id: cartId,
                 address: address,
                 status: 0,
-                payment_status: 0, //Chưa thanh toán
+                payment_status: 0,
                 total_price: amount,
                 order_id_code: orderIdCode,
                 note: req.body.note,
                 payment_methor: orderInfo,
             })
 
-            // Tạo chi tiết đơn hàng và kiểm tra sản phẩm
             for (const item of productsItem) {
                 await db.order_detail.create({
                     order_id: order.id,
@@ -289,12 +272,10 @@ const PaymentMethodController = {
                 })
             }
 
-            //Lấy danh sách các sản phẩm đã mua trong đơn hàng.
             const orderDetails = await db.order_detail.findAll({
                 where: { order_id: order.id },
             });
 
-            //Giảm quantity trong bảng product với số lượng tương ứng đã mua
             for (const item of productsItem) {
                 const product = await db.product.findOne({
                     where: { id: item.product_id },
@@ -312,15 +293,12 @@ const PaymentMethodController = {
                     throw new Error(`Không đủ số lượng sản phẩm ID: ${item.product_id}`);
                 }
 
-                //increment là một phương thức được sử dụng để tăng (hoặc giảm) giá trị của một hoặc nhiều cột trong cơ sở dữ liệu một cách trực tiếp
                 await db.product.increment(
                     { quantity: -item.quantity },
                     { where: { id: item.product_id } }
                 );
             }
 
-
-            //Xóa sản phẩm trong giỏ hàng khi thanh toán xong
             const cartItem = await db.cart_item.findOne({
                 where: { cart_id: order.cart_id }
             })
