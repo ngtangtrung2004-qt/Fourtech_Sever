@@ -5,8 +5,6 @@ const CommentController = {
   getAllComment: async (req, res) => {
     try {
       const comments = await db.review.findAll({
-        // where: { parent_comment_id: null },
-
         include: [
           {
             model: db.user,

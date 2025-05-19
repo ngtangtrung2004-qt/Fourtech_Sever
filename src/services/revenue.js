@@ -19,6 +19,7 @@ const getDashboardData = async () => {
             order: [[fn('DATE_FORMAT', col('created_at'), '%Y-%m'), 'ASC']],
         });
 
+
         const monthlyRevenue = monthlyRevenueResults.map(result => ({
             month: result.get('month'),
             totalSales: parseFloat(result.get('totalSales')),
